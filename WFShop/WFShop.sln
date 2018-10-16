@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFShop", "WFShop\WFShop.csproj", "{3A02530E-68B8-4798-9CD0-962D5EC9622D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3A02530E-68B8-4798-9CD0-962D5EC9622D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A02530E-68B8-4798-9CD0-962D5EC9622D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A02530E-68B8-4798-9CD0-962D5EC9622D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A02530E-68B8-4798-9CD0-962D5EC9622D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3C244447-C61D-4F3A-BDBA-198D28765BAC}
+	EndGlobalSection
+EndGlobal
