@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Numerics;
 
 namespace WFShop
 {
@@ -12,7 +13,8 @@ namespace WFShop
     {
         public MyForm()
         {
-
+            ShoppingCart entries = new ShoppingCart();
+            List<Product> products = FileHandler.ReadProductsFromFile();
         }
     }
 }
