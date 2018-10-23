@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Numerics;
+using System.IO;
 
 namespace WFShop
 {
@@ -14,7 +15,15 @@ namespace WFShop
         public MyForm()
         {
             ShoppingCart entries = new ShoppingCart();
-            List<Product> products = FileHandler.ReadProductsFromFile();
+            List<Product> products = new List<Product>();
+            try
+            {
+                products = FileHandler.ReadProductsFromFile("productSortiment.csv", 4);
+            }
+            catch (FileNotFoundException e)
+            {
+                throw e;
+            }
         }
     }
 }
