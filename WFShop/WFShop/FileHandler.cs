@@ -22,17 +22,17 @@ namespace WFShop
 
             foreach (var line in lines)
             {
-                string[] v = line.Split('#');
+                string[] commaSeparatedValues = line.Split('#');
                 try
                 {
                     // Kasta undantag ifall parameterantalet i textfilen understigs eller överstigs.
-                    if (v.Length < textFileParameterCount || v.Length > textFileParameterCount)
-                        throw new ArgumentOutOfRangeException(nameof(v), "Olagligt antal parametrar lästes in från textfil.");
+                    if (commaSeparatedValues.Length < textFileParameterCount || commaSeparatedValues.Length > textFileParameterCount)
+                        throw new ArgumentOutOfRangeException(nameof(commaSeparatedValues), "Olagligt antal parametrar lästes in från textfil.");
                     // Kasta undantag vid eventuell formateringsfel.
-                    int serialNumber = int.Parse(v[0]);
-                    string name = v[1];
-                    decimal price = decimal.Parse(v[2]);
-                    string description = v[3];
+                    int serialNumber = int.Parse(commaSeparatedValues[0]);
+                    string name = commaSeparatedValues[1];
+                    decimal price = decimal.Parse(commaSeparatedValues[2]);
+                    string description = commaSeparatedValues[3];
                     // Ingen ny produkt läggs till om ett fel kastas.
                     products.Add(new Product(serialNumber, name, price, description));
                 }

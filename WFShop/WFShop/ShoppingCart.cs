@@ -63,6 +63,81 @@ namespace WFShop
             .Select(kvp => new Entry(kvp.Key, kvp.Value))
             .GetEnumerator();
 
+        //public IEnumerator<Entry> GetEnumerator()
+        //{
+        //    var sortedCart = cart.OrderBy(kvp => kvp.Key.Name, StringComparer.CurrentCulture);
+        //    foreach (var kvp in sortedCart)
+        //    {
+        //        yield return new Entry(kvp.Key, kvp.Value);
+        //    }
+        //}
+
+        //void Exempel()
+        //{
+        //    var shoppingCart = this;
+        //    foreach(var entry in shoppingCart)
+        //    {
+        //        Console.WriteLine(entry.Product.Name + " x" + entry.Amount);
+        //    }
+        //}
+
+        //void Exempél()
+        //{
+        //    var shoppingCart = this;
+        //    using (IEnumerator<Entry> enumerator = shoppingCart.GetEnumerator())
+        //    {
+        //        while (enumerator.MoveNext())
+        //        {
+        //            var entry = enumerator.Current;
+        //            Console.WriteLine(entry.Product.Name + " x" + entry.Amount);
+        //        }
+        //    }
+        //}
+
+        //public IEnumerator<Entry> GetEnumerator()
+        //{
+        //    var sortedEntryList = cart.OrderBy(kvp => kvp.Key.Name, StringComparer.CurrentCulture)
+        //            .Select(kvp => new Entry(kvp.Key, kvp.Value)).ToList();
+        //    return new MyEnumerator(sortedEntryList);
+        //}
+
+        //private class MyEnumerator : IEnumerator<Entry>
+        //{
+        //    public MyEnumerator(List<Entry> list)
+        //    {
+        //        entries = list;
+        //    }
+
+        //    List<Entry> entries;
+        //    int index = 0;
+
+        //    public Entry Current { get; private set; }
+
+        //    object IEnumerator.Current { get { return Current; } }
+
+        //    public void Dispose()
+        //    { }
+
+        //    public bool MoveNext()
+        //    {
+        //        if (index >= entries.Count)
+        //        {
+        //            Current = default;
+        //            return false;
+        //        }
+        //        else
+        //        {
+        //            Current = entries[index];
+        //            return true;
+        //        }
+        //    }
+
+        //    public void Reset()
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public readonly struct Entry

@@ -24,6 +24,7 @@ namespace WFShop
             {
                 throw e;
             }
+            Controls.Add(new ProductBox(new Product(1234, "Äpple", 299, "Beskrivning av ett äpple.")));
         }
     }
 }
