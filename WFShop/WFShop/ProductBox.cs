@@ -10,17 +10,43 @@ namespace WFShop
 {
     class ProductBox : Control
     {
-        // Controls field
+        // Control fields
         private Button addToCartButton;
         private RichTextBox productDescriptionTextBox;
 
+        // Fields
+        private Color accentColor;
+        private string controlFont;
+
         // Istället för Tag
         private Product product;
+
+        // Properties
+        public Color AccentColor
+        {
+            private get => accentColor;
+            set
+            {
+                accentColor = value;
+                Reinitialise();
+            }
+        }
+        public string ControlFont
+        {
+            private get => controlFont;
+            set
+            {
+                controlFont = value;
+                Reinitialise();
+            }
+        }
 
         // Konstruktorn sätter defaultvärden och tar emot valfria värden som sätter storleken på kontrollen.
         public ProductBox(Product product, int width = 250, int height = 300) : base(text: "", left: 0, top: 0, width, height)
         {
             this.product = product;
+            accentColor = Color.Orange;
+            controlFont = "Arial";
 
             Initialise();
         }
@@ -35,20 +61,21 @@ namespace WFShop
             {
                 ColumnCount = 2,
                 Dock = DockStyle.Fill,
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
+                //CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
             panel.Controls.Add(table);
-            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 200));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, Height / 2));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 20));
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
 
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
             PictureBox productThumbnailBox = new PictureBox
             {
-                BackColor = Color.Black,
+                BackColor = accentColor,
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0),
                 Cursor = Cursors.Hand
@@ -60,7 +87,8 @@ namespace WFShop
             Label productNameLabel = new Label
             {
                 Text = product.Name,
-                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font(ControlFont, 12, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleLeft,
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(productNameLabel);
@@ -69,17 +97,21 @@ namespace WFShop
             productDescriptionTextBox = new RichTextBox
             {
                 Text = product.Description,
+                Font = new Font(ControlFont, 12),
                 BorderStyle = BorderStyle.None,
                 ScrollBars = RichTextBoxScrollBars.Vertical,
+                ReadOnly = true,
                 BackColor = panel.BackColor,
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(productDescriptionTextBox);
+            table.SetColumnSpan(productDescriptionTextBox, 2);
             table.SetRowSpan(productDescriptionTextBox, 2);
 
             table.Controls.Add(new Label
             {
                 Text = $"{product.Price} kr",
+                Font = new Font(ControlFont, 12, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill
             });
@@ -87,13 +119,16 @@ namespace WFShop
             addToCartButton = new Button
             {
                 Text = "Lägg till",
+                Font = new Font(ControlFont, 12, FontStyle.Bold),
+                BackColor = accentColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(addToCartButton);
             addToCartButton.Click += OnAddToCartButtonClick;
         }
 
-        // Behövs nog antagligen inte.
         private void Reinitialise()
         {
             Controls.Clear();

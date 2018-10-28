@@ -10,7 +10,7 @@ namespace WFShop
 {
     class FileHandler
     {
-        public static List<Product> ReadProductsFromFile(string path, int textFileParameterCount)
+        public static List<Product> ReadProductsFromFile(string path, int textFileValueCount)
         { 
             List<Product> products = new List<Product>();
             string[] lines = { };
@@ -25,16 +25,17 @@ namespace WFShop
                 string[] commaSeparatedValues = line.Split('#');
                 try
                 {
-                    // Kasta undantag ifall parameterantalet i textfilen understigs eller överstigs.
-                    if (commaSeparatedValues.Length < textFileParameterCount || commaSeparatedValues.Length > textFileParameterCount)
-                        throw new ArgumentOutOfRangeException(nameof(commaSeparatedValues), "Olagligt antal parametrar lästes in från textfil.");
+                    // Kasta undantag ifall antalet värden per rad i textfilen understigs eller överstigs.
+                    if (commaSeparatedValues.Length < textFileValueCount || commaSeparatedValues.Length > textFileValueCount)
+                        throw new ArgumentOutOfRangeException(nameof(commaSeparatedValues), "Olagligt antal värden lästes in från textfil.");
                     // Kasta undantag vid eventuell formateringsfel.
                     int serialNumber = int.Parse(commaSeparatedValues[0]);
                     string name = commaSeparatedValues[1];
                     decimal price = decimal.Parse(commaSeparatedValues[2]);
-                    string description = commaSeparatedValues[3];
-                    // Ingen ny produkt läggs till om ett fel kastas.
-                    products.Add(new Product(serialNumber, name, price, description));
+                    string category = commaSeparatedValues[3];
+                    string description = commaSeparatedValues[4];
+                    // Ingen ny produkt läggs till om ett undantag kastas.
+                    products.Add(new Product(serialNumber, name, price, category, description));
                 }
                 catch (ArgumentOutOfRangeException e)
                 {
@@ -54,7 +55,20 @@ namespace WFShop
             return products;
         }
 
+        // Kanske inte behövs?
         private static Image ReadImageFromFile() => throw new NotImplementedException();
-       
+
+        // Metoder som kan användas till att skapa ett kvitto och spara som en fil på datorn.
+        public static void CreateReceipt(List<Product> cart) => throw new NotImplementedException();
+
+        public static void CreateReceipt(List<Product> cart, string path) => throw new NotImplementedException();
+
+        // Metoder som kan användas till att spara varukorgen som en fil på datorn.
+        public static void SaveShoppingCart(List<Product> cart) => throw new NotImplementedException();
+
+        public static void SaveShoppingCart(List<Product> cart, string path) => throw new NotImplementedException();
+
+        // Kan användas till att läsa in den sparade varukorgen när en ny instans av programmet skapas eller på användarens begäran.
+        public static List<Product> LoadShoppingCart(string path) => throw new NotImplementedException();
     }
 }
