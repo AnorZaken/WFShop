@@ -10,10 +10,10 @@ namespace WFShop
 {
     class FileHandler
     {
-        public static List<Product> ReadProductsFromFile(string path, int textFileValueCount)
+        public static List<Product> ReadProductsFromFile(string path)
         { 
             List<Product> products = new List<Product>();
-            string[] lines = { };
+            string[] lines = Array.Empty<string>();
             // Kasta undantag ifall filen inte existerar.
             if (File.Exists(path))
                 lines = File.ReadAllLines(path);
@@ -25,9 +25,6 @@ namespace WFShop
                 string[] commaSeparatedValues = line.Split('#');
                 try
                 {
-                    // Kasta undantag ifall antalet värden per rad i textfilen understigs eller överstigs.
-                    if (commaSeparatedValues.Length < textFileValueCount || commaSeparatedValues.Length > textFileValueCount)
-                        throw new ArgumentOutOfRangeException(nameof(commaSeparatedValues), "Olagligt antal värden lästes in från textfil.");
                     // Kasta undantag vid eventuell formateringsfel.
                     int serialNumber = int.Parse(commaSeparatedValues[0]);
                     string name = commaSeparatedValues[1];
@@ -37,18 +34,14 @@ namespace WFShop
                     // Ingen ny produkt läggs till om ett undantag kastas.
                     products.Add(new Product(serialNumber, name, price, category, description));
                 }
-                catch (ArgumentOutOfRangeException e)
-                {
-                    throw e;
-                }
                 catch (FormatException e)
                 {
-                    throw e;
+                    // Meddelande: "Textrad lästes inte in korrekt."
                 }
                 catch (Exception e)
                 {
                     // Om undantag kastas av oförväntad anledning.
-                    throw e;
+                    // Meddelande: "Kunde inte läsa in textrad."
                 }
             }
 
@@ -70,5 +63,11 @@ namespace WFShop
 
         // Kan användas till att läsa in den sparade varukorgen när en ny instans av programmet skapas eller på användarens begäran.
         public static List<Product> LoadShoppingCart(string path) => throw new NotImplementedException();
+
+        // Läser från textfil med rabattkoder.
+        // Ska rabattkod dra av totalkostnaden eller av specifika produkter?
+        // Hur ska rabattkoder sammankopplas med dessa produkter?
+
+        // public static ??? ReadCouponCodes(string path) => throw new NotImplementedException();
     }
 }

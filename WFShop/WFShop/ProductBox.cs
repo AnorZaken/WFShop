@@ -28,7 +28,7 @@ namespace WFShop
             set
             {
                 accentColor = value;
-                Reinitialise();
+                ReInitialise();
             }
         }
         public string ControlFont
@@ -37,11 +37,11 @@ namespace WFShop
             set
             {
                 controlFont = value;
-                Reinitialise();
+                ReInitialise();
             }
         }
 
-        // Konstruktorn sätter defaultvärden och tar emot valfria värden som sätter storleken på kontrollen.
+        // Konstruktorn sätter defaultvärden eller tar emot valfria värden som sätter storleken på kontrollen.
         public ProductBox(Product product, int width = 250, int height = 300) : base(text: "", left: 0, top: 0, width, height)
         {
             this.product = product;
@@ -129,7 +129,7 @@ namespace WFShop
             addToCartButton.Click += OnAddToCartButtonClick;
         }
 
-        private void Reinitialise()
+        private void ReInitialise()
         {
             Controls.Clear();
             Initialise();

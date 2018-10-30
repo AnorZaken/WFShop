@@ -24,7 +24,7 @@ namespace WFShop
             List<Product> products = new List<Product>();
             try
             {
-                products = FileHandler.ReadProductsFromFile("productSortiment.csv", 5);
+                products = FileHandler.ReadProductsFromFile("productSortiment.csv");
             }
             catch (FileNotFoundException e)
             {
@@ -40,7 +40,7 @@ namespace WFShop
             {
                 flowLayoutPanel.Controls.Add(new ProductBox(product));
             }
-            ProductBox productBox = new ProductBox(new Product(8973, "Skräddarsydd ProductBox", 0.00m, "Övrigt", 
+            ProductBox productBox = new ProductBox(new Product(8973, "Skräddarsydd ProductBox", 0, "Övrigt", 
                 "ProductBox kan anpassas till valfri storlek, typsnitt och accentfärg. Om inget av dessa anges sätts de till defaultvärdet: \n\nStorlek: 250x300 \nTypsnitt: Arial \nAccentfärg: Orange"),
                 300, 350)
             { AccentColor = Color.DarkGreen, ControlFont = "Calibri" };
