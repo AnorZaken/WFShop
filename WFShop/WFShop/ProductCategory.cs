@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace WFShop
 {
     // gör lite fula trick kanske :P
-    public readonly struct ProductCategory : IEquatable<ProductCategory>, IEquatable<string>
+    readonly struct ProductCategory : IEquatable<ProductCategory>, IEquatable<string>
     {
         public string Name { get; }
         public string Description => GetDescription(Name);
@@ -37,7 +37,8 @@ namespace WFShop
             => Name != null & Name == other.Name;
 
         public override bool Equals(object obj)
-            => obj is ProductCategory other && this.Equals(other);
+            => (obj is ProductCategory other && this.Equals(other))
+            || (obj is string otherString && this.Equals(otherString));
 
         public static bool operator ==(ProductCategory a, ProductCategory b)
             => a.Equals(b);
