@@ -12,8 +12,13 @@ namespace WFShop
 {
     class MyForm : Form
     {
+        private FlowLayoutPanel list;
+
         public MyForm()
         {
+            Text = "<App Name>";
+            Size = new Size(1000, 500);
+
             Initialise();
         }
 
@@ -31,20 +36,31 @@ namespace WFShop
                 throw e;
             }
 
-            FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel
+            SplitContainer splitContainer = new SplitContainer
             {
                 Dock = DockStyle.Fill
             };
-            Controls.Add(flowLayoutPanel);
-            foreach (Product product in products)
+            Controls.Add(splitContainer);
+
+            FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel
             {
-                flowLayoutPanel.Controls.Add(new ProductBox(product));
-            }
-            ProductBox productBox = new ProductBox(new Product(8973, "Skräddarsydd ProductBox", 0, "Övrigt", 
+                AutoScroll = true,
+                Dock = DockStyle.Fill
+            };
+            splitContainer.Panel1.Controls.Add(flowLayoutPanel);
+
+            list = new FlowLayoutPanel
+            {
+                AutoScroll = true,
+                Dock = DockStyle.Fill
+            };
+            splitContainer.Panel2.Controls.Add(list);
+            ProductBox productBox = new ProductBox(new Product(8973, "Skräddarsydd ProductBox", 12, "Övrigt",
                 "ProductBox kan anpassas till valfri storlek, typsnitt och accentfärg. Om inget av dessa anges sätts de till defaultvärdet: \n\nStorlek: 250x300 \nTypsnitt: Arial \nAccentfärg: Orange"),
                 300, 350)
             { AccentColor = Color.DarkGreen, ControlFont = "Calibri" };
             flowLayoutPanel.Controls.Add(productBox);
+            productBox.AddToCartButton.Click += OnAddToCartButtonClick;
 
         }
 
@@ -53,6 +69,15 @@ namespace WFShop
         {
             Controls.Clear();
             Initialise();
+        }
+
+        private void OnAddToCartButtonClick(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            Product p = (Product)button.Tag;
+            Console.WriteLine($"Added {p.Name} to cart.");
+            CartItemBox cartItemBox = new CartItemBox(p);
+            list.Controls.Add(cartItemBox);
         }
     }
 }
