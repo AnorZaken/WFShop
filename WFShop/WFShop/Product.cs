@@ -29,9 +29,9 @@ namespace WFShop
             => obj is Product other && this.Equals(other);
 
         public static bool operator ==(Product a, Product b)
-            => a != null && a.Equals(b);
+            => a is null ? b is null : a.Equals(b);
         public static bool operator !=(Product a, Product b)
-            => a == null || !a.Equals(b);
+            => !(a is null ? b is null : a.Equals(b));
 
         public override int GetHashCode()
             => Price.GetHashCode() + (Name.GetHashCode() + SerialNumber * 29) * 23; // 23 and 29 are prime.
