@@ -15,18 +15,75 @@ namespace WFShop
      */
     class ShoppingCart : IEnumerable<ProductEntry>
     {
-        private Dictionary<Product, int> cart = new Dictionary<Product, int>();
-        private List<Discount> discounts = new List<Discount>();
+        private readonly Dictionary<Product, int> cart = new Dictionary<Product, int>();
+        private readonly HashSet<Discount> appliedCupons = new HashSet<Discount>();
 
         // Antalet unika produkter, dvs har man 4st äpplen och 6st ägg så är antalet unika produkter 2.
-        public int UniqueCount => cart.Count;
+        public int UniqueProductCount => cart.Count;
+
+        // dessa variabler är cachade / lazy, och uppdateras vid behov!
+        private bool isDirtyArticles = true;
+        private bool isDirtyDiscounts = true;
+        private decimal p_articleValue, p_discountValue;
+        private int p_articleCount;
+        private IReadOnlyCollection<Discount> p_appliedRebates = Array.Empty<Discount>();
 
         // Antalet varor, dvs har man 4st äpplen och 6st ägg så är antalet varor 10.
-        public int TotalCount => cart.Values.Sum();
+        public int ArticleCount
+            => isDirtyArticles
+            ? p_articleCount = cart.Values.Sum()
+            : p_articleCount;
 
-        // Totala kostnaden för varorna i kundvagnen.
-        public decimal TotalCost => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
-        // (skulle istället kunna uppdatera detta värdet varje gång vi lägger till och tar bort produkter)
+        // Totala värdet av varorna i kundvagnen, exklusive rabatter.
+        public decimal ArticleValue
+            => isDirtyArticles
+            ? p_articleValue = CalculateArticleValue()
+            : p_articleValue;
+
+        // Totala rabatten på varorna i kundvagnen.
+        public decimal DiscountValue
+            => isDirtyArticles | isDirtyDiscounts
+            ? p_discountValue = CalculateDiscountValue()
+            : p_discountValue;
+
+        // Totala kostnaden för varorna i kundvagnen, inklusive rabatter.
+        public decimal FinalPrice => ArticleValue - DiscountValue;
+
+        protected decimal CalculateArticleValue()
+            => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
+
+        protected IEnumerable<Discount> FindApplicableRebates()
+            => Discount.AllRebates.Where(d => d.DoesApply(cart));
+
+        protected decimal CalculateDiscountValue()
+            => AppliedRebates.Sum(d => d.Calculate(cart)) + appliedCupons.Sum(d => d.Calculate(cart));
+
+        public bool AddCupon(Discount cupon)
+        {
+            if (cupon == null)
+                throw new ArgumentNullException();
+            if (cupon.CuponCode != null && appliedCupons.Add(cupon))
+            {
+                isDirtyDiscounts = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool RemoveCupon(Discount cupon)
+        {
+            if (cupon == null)
+                throw new ArgumentNullException();
+            bool b = appliedCupons.Remove(cupon);
+            isDirtyDiscounts |= b;
+            return b;
+        }
+
+        public bool AddCupon(string cuponCode)
+            => Discount.TryGetCupon(cuponCode, out Discount d) && AddCupon(d);
+
+        public bool RemoveCupon(string cuponCode)
+            => Discount.TryGetCupon(cuponCode, out Discount d) && RemoveCupon(d);
 
         public void Add(Product product, int amount = 1)
         {
@@ -36,14 +93,17 @@ namespace WFShop
             if (cart.TryGetValue(product, out int existingAmount))
                 amount += existingAmount;
             cart[product] = amount;
+            isDirtyArticles = true;
         }
 
-        public void RemoveAll(Product product)
+        public bool RemoveAll(Product product)
         {
-            cart.Remove(product);
+            bool b = cart.Remove(product);
+            isDirtyArticles |= b;
+            return b;
         }
 
-        public void Remove(Product product, int amount)
+        public bool Remove(Product product, int amount)
         {
             if (amount < 1)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Cannot remove less than one product.");
@@ -55,14 +115,22 @@ namespace WFShop
                     cart[product] = existingAmount;
                 else
                     cart.Remove(product);
+                isDirtyArticles = true;
+                return true;
             }
+            return false;
         }
 
         public IEnumerable<ProductEntry> Products
             => this;
 
-        public IEnumerable<IDiscount> Discounts
-            => discounts.AsReadOnly();
+        public IReadOnlyCollection<IDiscount> AppliedCupons
+            => appliedCupons.ToArray();
+
+        public IReadOnlyCollection<IDiscount> AppliedRebates
+            => isDirtyArticles
+            ? p_appliedRebates = FindApplicableRebates().ToArray()
+            : p_appliedRebates;
 
         IEnumerator<ProductEntry> IEnumerable<ProductEntry>.GetEnumerator()
             => cart

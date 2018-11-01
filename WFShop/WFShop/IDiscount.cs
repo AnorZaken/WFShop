@@ -9,7 +9,7 @@ namespace WFShop
         string Name { get; }
         string Description { get; }
 
-        // Null if this is a fixed rebate and not a cupon-code.
+        // Null if this is a rebate and not a cupon-code.
         string CuponCode { get; }
 
         // Applies to [a] specific product[s] only?
@@ -18,7 +18,7 @@ namespace WFShop
         // Note: returns -1 if not product specific.
         int ProductSerialNumber { get; }
 
-        bool DoesApply(List<Product> products);
-        decimal Calculate(List<Product> products);
+        bool DoesApply(IReadOnlyDictionary<Product, int> cart);
+        decimal Calculate(IReadOnlyDictionary<Product, int> cart);
     }
 }
