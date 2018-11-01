@@ -51,7 +51,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Discount.cs" />
     <Compile Include="FileHandler.cs" />
+    <Compile Include="IDiscount.cs" />
+    <Compile Include="IDiscountParser.cs" />
     <Compile Include="MyForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -60,6 +63,7 @@
     <Compile Include="ProductBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ProductEntry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShoppingCart.cs" />

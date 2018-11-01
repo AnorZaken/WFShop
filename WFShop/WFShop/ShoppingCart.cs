@@ -7,15 +7,16 @@ using System.Text;
 namespace WFShop
 {
     /* För att läsa ut varorna:
-     * foreach (var entry in shoppingCart)
+     * foreach (var entry in shoppingCart.Products)
      * {
      *     var product = entry.Product;
      *     var amount = entry.Amount;
      * }
      */
-    class ShoppingCart : IEnumerable<ShoppingCart.Entry>
+    class ShoppingCart : IEnumerable<ProductEntry>
     {
         private Dictionary<Product, int> cart = new Dictionary<Product, int>();
+        private List<Discount> discounts = new List<Discount>();
 
         // Antalet unika produkter, dvs har man 4st äpplen och 6st ägg så är antalet unika produkter 2.
         public int UniqueCount => cart.Count;
@@ -57,10 +58,16 @@ namespace WFShop
             }
         }
 
-        public IEnumerator<Entry> GetEnumerator()
+        public IEnumerable<ProductEntry> Products
+            => this;
+
+        public IEnumerable<IDiscount> Discounts
+            => discounts.AsReadOnly();
+
+        IEnumerator<ProductEntry> IEnumerable<ProductEntry>.GetEnumerator()
             => cart
             .OrderBy(kvp => kvp.Key.Name, StringComparer.CurrentCulture)
-            .Select(kvp => new Entry(kvp.Key, kvp.Value))
+            .Select(kvp => new ProductEntry(kvp.Key, kvp.Value))
             .GetEnumerator();
 
         //public IEnumerator<Entry> GetEnumerator()
@@ -138,18 +145,6 @@ namespace WFShop
         //    }
         //}
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public readonly struct Entry
-        {
-            public readonly Product Product;
-            public readonly int Amount;
-
-            public Entry(Product product, int amount)
-            {
-                Product = product;
-                Amount = amount;
-            }
-        }
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ProductEntry>)this).GetEnumerator();
     }
 }
