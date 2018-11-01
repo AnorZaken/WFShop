@@ -11,14 +11,11 @@ namespace WFShop
     class ProductBox : Control
     {
         // Control fields
-        private Button addToCartButton;
-        private RichTextBox productDescriptionTextBox;
+        public Button AddToCartButton;
 
         // Fields
         private Color accentColor;
         private string controlFont;
-
-        // Istället för Tag
         private Product product;
 
         // Properties
@@ -27,7 +24,7 @@ namespace WFShop
             private get => accentColor;
             set
             {
-                accentColor = value;
+;               accentColor = value;
                 ReInitialise();
             }
         }
@@ -45,9 +42,6 @@ namespace WFShop
         public ProductBox(Product product, int width = 250, int height = 300) : base(text: "", left: 0, top: 0, width, height)
         {
             this.product = product;
-            accentColor = Color.Orange;
-            controlFont = "Arial";
-
             Initialise();
         }
         
@@ -64,18 +58,24 @@ namespace WFShop
                 //CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
             panel.Controls.Add(table);
+            // Hälften av kontrollen höjd tas upp av produktbilden.
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, Height / 2));
+            // Titel.
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, 20));
+            // Beskrivning.
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            // Statisk höjd på priset och knappens cell.
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
 
+            // Priset.
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            // Knappen.
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
             PictureBox productThumbnailBox = new PictureBox
             {
-                BackColor = accentColor,
+                BackColor = SetAccentColor(),
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0),
                 Cursor = Cursors.Hand
@@ -87,17 +87,17 @@ namespace WFShop
             Label productNameLabel = new Label
             {
                 Text = product.Name,
-                Font = new Font(ControlFont, 12, FontStyle.Bold),
+                Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(productNameLabel);
             table.SetColumnSpan(productNameLabel, 2);
 
-            productDescriptionTextBox = new RichTextBox
+            RichTextBox productDescriptionTextBox = new RichTextBox
             {
                 Text = product.Description,
-                Font = new Font(ControlFont, 12),
+                Font = new Font(SetControlFont(), 12),
                 BorderStyle = BorderStyle.None,
                 ScrollBars = RichTextBoxScrollBars.Vertical,
                 ReadOnly = true,
@@ -108,25 +108,27 @@ namespace WFShop
             table.SetColumnSpan(productDescriptionTextBox, 2);
             table.SetRowSpan(productDescriptionTextBox, 2);
 
+            // Pris-etiketten
             table.Controls.Add(new Label
             {
                 Text = $"{product.Price} kr",
-                Font = new Font(ControlFont, 12, FontStyle.Bold),
+                Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill
             });
 
-            addToCartButton = new Button
+            AddToCartButton = new Button
             {
                 Text = "Lägg till",
-                Font = new Font(ControlFont, 12, FontStyle.Bold),
-                BackColor = accentColor,
+                Font = new Font(SetControlFont(), 12, FontStyle.Bold),
+                BackColor = SetAccentColor(),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                Tag = product
             };
-            table.Controls.Add(addToCartButton);
-            addToCartButton.Click += OnAddToCartButtonClick;
+            table.Controls.Add(AddToCartButton);
+            //addToCartButton.Click += OnAddToCartButtonClick;
         }
 
         private void ReInitialise()
@@ -135,10 +137,15 @@ namespace WFShop
             Initialise();
         }
 
-        private void OnAddToCartButtonClick(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        private Color SetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
+
+        private string SetControlFont() => controlFont ?? "Arial";
+
+        //private void OnAddToCartButtonClick(object sender, EventArgs e)
+        //{
+        //    FlowLayoutPanel flow = (FlowLayoutPanel)Tag;
+        //    flow.Controls.Add(new CartItemBox(product));
+        //}
 
         private void OnProductThumbnailBoxClick(object sender, EventArgs e)
         {
