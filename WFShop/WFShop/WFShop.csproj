@@ -51,6 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CartItemBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Discount.cs" />
     <Compile Include="FileHandler.cs" />
     <Compile Include="IDiscount.cs" />

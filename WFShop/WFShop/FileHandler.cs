@@ -34,14 +34,18 @@ namespace WFShop
                     // Ingen ny produkt läggs till om ett undantag kastas.
                     products.Add(new Product(serialNumber, name, price, category, description));
                 }
-                catch (FormatException e)
+                catch (FormatException)
                 {
                     // Meddelande: "Textrad lästes inte in korrekt."
+                    string errorMessage = $"Rad \"{line}\" lästes inte in korrekt. Var god kontrollera källan.";
+                    Console.WriteLine(errorMessage);
                 }
                 catch (Exception e)
                 {
                     // Om undantag kastas av oförväntad anledning.
                     // Meddelande: "Kunde inte läsa in textrad."
+                    string errorMessage = $"Fångade oväntat fel på rad \"{line}\". Fördjupad felinformation:\n{e}";
+                    Console.WriteLine(errorMessage);
                 }
             }
 
