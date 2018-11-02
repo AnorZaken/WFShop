@@ -12,7 +12,14 @@ namespace WFShop
 {
     class MyForm : Form
     {
-        private FlowLayoutPanel list;
+        private SplitContainer splitContainer;
+        private FlowLayoutPanel flowLayoutPanel;
+        private FlowLayoutPanel listFlow;
+
+        private SplitterPanel panel1;
+        private SplitterPanel panel2;
+
+        private ShoppingCart cart;
 
         public MyForm()
         {
@@ -25,43 +32,48 @@ namespace WFShop
         // Rita upp GUI:t.
         private void Initialise()
         {
-            ShoppingCart entries = new ShoppingCart();
-            List<Product> products = new List<Product>();
-            try
-            {
-                products = FileHandler.ReadProductsFromFile("productSortiment.csv");
-            }
-            catch (FileNotFoundException e)
-            {
-                throw e;
-            }
+            List<Product> products = FileHandler.ReadProductsFromFile("productSortiment.csv");
+            cart = new ShoppingCart();
 
-            SplitContainer splitContainer = new SplitContainer
-            {
-                Dock = DockStyle.Fill
-            };
+            splitContainer = new SplitContainer { Dock = DockStyle.Fill, BorderStyle = BorderStyle.FixedSingle };
             Controls.Add(splitContainer);
 
-            FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel
+            panel1 = splitContainer.Panel1;
+            panel2 = splitContainer.Panel2;
+
+            flowLayoutPanel = new FlowLayoutPanel
             {
                 AutoScroll = true,
                 Dock = DockStyle.Fill
             };
-            splitContainer.Panel1.Controls.Add(flowLayoutPanel);
+            panel1.Controls.Add(flowLayoutPanel);
 
-            list = new FlowLayoutPanel
+            listFlow = new FlowLayoutPanel
             {
                 AutoScroll = true,
                 Dock = DockStyle.Fill
             };
-            splitContainer.Panel2.Controls.Add(list);
-            ProductBox productBox = new ProductBox(new Product(8973, "Skräddarsydd ProductBox", 12, "Övrigt",
-                "ProductBox kan anpassas till valfri storlek, typsnitt och accentfärg. Om inget av dessa anges sätts de till defaultvärdet: \n\nStorlek: 250x300 \nTypsnitt: Arial \nAccentfärg: Orange"),
-                300, 350)
-            { AccentColor = Color.DarkGreen, ControlFont = "Calibri" };
-            flowLayoutPanel.Controls.Add(productBox);
-            productBox.AddToCartButton.Click += OnAddToCartButtonClick;
+            panel2.Controls.Add(listFlow);
 
+            ProductBox customProductBox = new ProductBox(new Product(1234, "Skräddarsydd ProductBox", 0, "Övrigt", "Exempel på en skräddarsydd ProductBox."), () => { })
+            {
+                AccentColor = Color.DarkGreen,
+                ControlFont = "Calibri"
+            };
+            flowLayoutPanel.Controls.Add(customProductBox);
+
+            foreach (var product in products)
+            {
+                // Metod att skicka till ProductBox.
+                Action onAddToCartButtonClicked = () =>
+                {
+                    cart.Add(product);
+                    CreateCartList();
+                };
+
+                ProductBox productBox = new ProductBox(product, onAddToCartButtonClicked);
+                flowLayoutPanel.Controls.Add(productBox);
+            }
         }
 
         // Töm och rita om GUI:t.
@@ -71,13 +83,26 @@ namespace WFShop
             Initialise();
         }
 
-        private void OnAddToCartButtonClick(object sender, EventArgs e)
+        // Uppdaterar även listFlow.
+        private void CreateCartList()
         {
-            Button button = (Button)sender;
-            Product p = (Product)button.Tag;
-            Console.WriteLine($"Added {p.Name} to cart.");
-            CartItemBox cartItemBox = new CartItemBox(p);
-            list.Controls.Add(cartItemBox);
+            // Ta bort eventuella kontroller som finns kvar i listFlow.
+            listFlow.Controls.Clear();
+            foreach (var entry in cart)
+            {
+                // Metod att skicka till CartItemBox.
+                Action onRemoveButtonClicked = () =>
+                {
+                    cart.Remove(entry.Product, 1);
+                    CreateCartList();
+                };
+
+                CartItemBox cartItemBox = new CartItemBox(entry, onRemoveButtonClicked);
+                listFlow.Controls.Add(cartItemBox);
+
+                Console.WriteLine(cartItemBox);
+                
+            }
         }
     }
 }
