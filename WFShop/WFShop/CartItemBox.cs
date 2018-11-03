@@ -17,8 +17,12 @@ namespace WFShop
         // Fields
         private Color accentColor;
         private string controlFont;
-        private Product product;
         private int quantity;
+        private Action OnRemoveButtonClicked;
+
+        // Control properties.
+        private Button removeButton;
+        public ProductEntry ProductEntry { get; }
 
         // Properties
         public int Quantity
@@ -26,6 +30,7 @@ namespace WFShop
             get => quantity;
             set
             {
+                // TODO: Kan fel uppstå?
                 quantity = value < 1 ? 1 : value;
                 quantityLabel.Text = quantity.ToString();
                 totalPriceLabel.Text = $"{GetTotalCost()} kr";
@@ -52,11 +57,13 @@ namespace WFShop
             }
         }
 
-        public CartItemBox(Product product, int width = 450, int quantity = 1) : base(text: "", left: 0, top: 0, width, height: 50)
+        public CartItemBox(ProductEntry productEntry, Action onRemoveButtonClicked, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
         {
-            this.product = product;
-            this.quantity = quantity;
-
+            // TODO: Gör så att quantity aldrig kan vara mindre än 1.
+            ProductEntry = productEntry;
+            quantity = productEntry.Amount;
+            //this.quantity = quantity;
+            OnRemoveButtonClicked = onRemoveButtonClicked;
             Initialise();
         }
 
@@ -70,7 +77,6 @@ namespace WFShop
             TableLayoutPanel table = new TableLayoutPanel
             {
                 RowCount = 1,
-                //CellBorderStyle = TableLayoutPanelCellBorderStyle.Single,
                 Dock = DockStyle.Fill
             };
             panel.Controls.Add(table);
@@ -89,7 +95,6 @@ namespace WFShop
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
             // Allt = 100%
 
-            // TODO: Alla instantieringar behöver inte ske genom en deklaration.
             PictureBox productThumbnail = new PictureBox
             {
                 BackColor = SetAccentColor(),
@@ -101,7 +106,7 @@ namespace WFShop
 
             Label productNameLabel = new Label
             {
-                Text = product.Name,
+                Text = ProductEntry.Product.Name,
                 Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Dock = DockStyle.Fill
@@ -112,7 +117,7 @@ namespace WFShop
             // Pris-etiketten
             table.Controls.Add(new Label
             {
-                Text = $"{product.Price} kr",
+                Text = $"{ProductEntry.Product.Price} kr",
                 Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill
@@ -123,14 +128,14 @@ namespace WFShop
 
             totalPriceLabel = new Label
             {
-                Text = $"{product.Price * quantity} kr",
+                Text = $"{GetTotalCost()} kr",
                 TextAlign = ContentAlignment.MiddleCenter,
                 Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(totalPriceLabel, 4, 0);
 
-            Button removeButton = new Button
+            removeButton = new Button
             {
                 Text = "🗙",
                 Font = new Font(SetControlFont(), 12),
@@ -142,11 +147,11 @@ namespace WFShop
             };
             table.Controls.Add(removeButton, 5, 0);
             removeButton.Click += OnRemoveButtonClick;
-            
         }
 
         private Control CreateQuantityPanel()
         {
+            // Mini-kontroll.
             Control quantityPanel = new Control("", 0, 0, 150, Height - 2) { Margin = new Padding(0) };
 
             Panel panel = new Panel { Dock = DockStyle.Fill };
@@ -155,8 +160,7 @@ namespace WFShop
             TableLayoutPanel table = new TableLayoutPanel
             {
                 ColumnCount = 3,
-                Dock = DockStyle.Fill,
-                //CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
+                Dock = DockStyle.Fill
             };
             panel.Controls.Add(table);
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
@@ -184,7 +188,6 @@ namespace WFShop
                 Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 BackColor = Color.White,
                 Margin = new Padding(0, 5, 0, 5),
-                //BorderStyle = BorderStyle.FixedSingle,
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(quantityLabel);
@@ -212,21 +215,22 @@ namespace WFShop
             Initialise();
         }
 
+        // Om accentColor är tomt sätt det till orange.
         private Color SetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
 
+        // Om controlFont inte har ett värde, sätt den till Arial.
         private string SetControlFont() => controlFont ?? "Arial";
 
-        public decimal GetTotalCost() => product.Price * quantity;
-        
+        public decimal GetTotalCost() => ProductEntry.Product.Price * quantity;
+
+        public override string ToString() => $"CartItemBox describing: {ProductEntry.Product}";
+
         private void OnProductThumbnailClick(object sender, EventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void OnRemoveButtonClick(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        private void OnRemoveButtonClick(object sender, EventArgs e) => OnRemoveButtonClicked();
 
         private void OnProductNameLabelClick(object sender, EventArgs e)
         {
