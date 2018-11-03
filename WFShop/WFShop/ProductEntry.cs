@@ -30,5 +30,11 @@ namespace WFShop
 
         public static bool operator !=(in ProductEntry a, in ProductEntry b)
             => !a.Equals(b);
+
+        public static ProductEntry operator +(in ProductEntry pe, int amount)
+            => new ProductEntry(pe.Product, pe.Amount + amount);
+
+        public static ProductEntry operator -(in ProductEntry pe, int amount)
+            => new ProductEntry(pe.Product, pe.Amount - amount);
     }
 }
