@@ -9,8 +9,8 @@ namespace WFShop
         string Name { get; }
         string Description { get; }
 
-        // Null if this is a rebate and not a cupon-code.
-        string CuponCode { get; }
+        // Null if this is a rebate and not a coupon-code.
+        string CouponCode { get; }
 
         // Applies to [a] specific product[s] only?
         bool IsProductSpecific { get; }

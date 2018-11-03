@@ -16,7 +16,7 @@ namespace WFShop
     class ShoppingCart : IEnumerable<ProductEntry>
     {
         private readonly Dictionary<Product, int> cart = new Dictionary<Product, int>();
-        private readonly HashSet<Discount> appliedCupons = new HashSet<Discount>();
+        private readonly HashSet<Discount> appliedCoupons = new HashSet<Discount>();
 
         // Antalet unika produkter, dvs har man 4st äpplen och 6st ägg så är antalet unika produkter 2.
         public int UniqueProductCount => cart.Count;
@@ -56,13 +56,13 @@ namespace WFShop
             => Discount.AllRebates.Where(d => d.DoesApply(cart));
 
         protected decimal CalculateDiscountValue()
-            => AppliedRebates.Sum(d => d.Calculate(cart)) + appliedCupons.Sum(d => d.Calculate(cart));
+            => AppliedRebates.Sum(d => d.Calculate(cart)) + appliedCoupons.Sum(d => d.Calculate(cart));
 
-        public bool AddCupon(Discount cupon)
+        public bool AddCoupon(Discount coupon)
         {
-            if (cupon == null)
+            if (coupon == null)
                 throw new ArgumentNullException();
-            if (cupon.CuponCode != null && appliedCupons.Add(cupon))
+            if (coupon.CouponCode != null && appliedCoupons.Add(coupon))
             {
                 isDirtyDiscounts = true;
                 return true;
@@ -70,20 +70,20 @@ namespace WFShop
             return false;
         }
 
-        public bool RemoveCupon(Discount cupon)
+        public bool RemoveCoupon(Discount coupon)
         {
-            if (cupon == null)
+            if (coupon == null)
                 throw new ArgumentNullException();
-            bool b = appliedCupons.Remove(cupon);
+            bool b = appliedCoupons.Remove(coupon);
             isDirtyDiscounts |= b;
             return b;
         }
 
-        public bool AddCupon(string cuponCode)
-            => Discount.TryGetCupon(cuponCode, out Discount d) && AddCupon(d);
+        public bool AddCoupon(string couponCode)
+            => Discount.TryGetCoupon(couponCode, out Discount d) && AddCoupon(d);
 
-        public bool RemoveCupon(string cuponCode)
-            => Discount.TryGetCupon(cuponCode, out Discount d) && RemoveCupon(d);
+        public bool RemoveCoupon(string couponCode)
+            => Discount.TryGetCoupon(couponCode, out Discount d) && RemoveCoupon(d);
 
         public void Add(Product product, int amount = 1)
         {
@@ -124,8 +124,8 @@ namespace WFShop
         public IEnumerable<ProductEntry> Products
             => this;
 
-        public IReadOnlyCollection<IDiscount> AppliedCupons
-            => appliedCupons.ToArray();
+        public IReadOnlyCollection<IDiscount> AppliedCoupons
+            => appliedCoupons.ToArray();
 
         public IReadOnlyCollection<IDiscount> AppliedRebates
             => isDirtyArticles
