@@ -18,23 +18,18 @@ namespace WFShop
         private Color accentColor;
         private string controlFont;
         private int quantity;
-        private Action OnRemoveButtonClicked;
 
         // Control properties.
-        private Button removeButton;
-        public ProductEntry ProductEntry { get; }
+        public Button RemoveButton { get; set; }
+        public Button QuantitySubtractButton { get; set; }
+        public Button QuantityAddButton { get; set; }
 
         // Properties
-        public int Quantity
+        public ProductEntry ProductEntry { get; set; }
+        private int Quantity
         {
             get => quantity;
-            set
-            {
-                // TODO: Kan fel uppstå?
-                quantity = value < 1 ? 1 : value;
-                quantityLabel.Text = quantity.ToString();
-                totalPriceLabel.Text = $"{GetTotalCost()} kr";
-            }
+            set => quantity = value < 0 ? 0 : value;
         }
 
         public Color AccentColor
@@ -57,13 +52,10 @@ namespace WFShop
             }
         }
 
-        public CartItemBox(ProductEntry productEntry, Action onRemoveButtonClicked, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
+        public CartItemBox(ProductEntry productEntry, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
         {
-            // TODO: Gör så att quantity aldrig kan vara mindre än 1.
             ProductEntry = productEntry;
-            quantity = productEntry.Amount;
-            //this.quantity = quantity;
-            OnRemoveButtonClicked = onRemoveButtonClicked;
+            quantity = ProductEntry.Amount;
             Initialise();
         }
 
@@ -135,7 +127,7 @@ namespace WFShop
             };
             table.Controls.Add(totalPriceLabel, 4, 0);
 
-            removeButton = new Button
+            RemoveButton = new Button
             {
                 Text = "🗙",
                 Font = new Font(SetControlFont(), 12),
@@ -143,10 +135,12 @@ namespace WFShop
                 BackColor = Color.Red,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                // Tagga för enkel åtkomst.
+                Tag = ProductEntry,
+                Name = "RemoveButton"
             };
-            table.Controls.Add(removeButton, 5, 0);
-            removeButton.Click += OnRemoveButtonClick;
+            table.Controls.Add(RemoveButton, 5, 0);
         }
 
         private Control CreateQuantityPanel()
@@ -167,7 +161,8 @@ namespace WFShop
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
-            Button quantitySubtractButton = new Button
+
+            QuantitySubtractButton = new Button
             {
                 Text = "-",
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -176,14 +171,23 @@ namespace WFShop
                 BackColor = SetAccentColor(),
                 ForeColor = Color.White,
                 Margin = new Padding(3, 3, 0, 3),
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                // Tagga för enkel åtkomst.
+                Tag = ProductEntry,
+                Name = "QuantitySubtractButton"
             };
-            table.Controls.Add(quantitySubtractButton);
-            quantitySubtractButton.Click += (s, e) => Quantity--;
+            table.Controls.Add(QuantitySubtractButton);
+            QuantitySubtractButton.Click += (s, e) =>
+            {
+                // Ändrar inte antalet produkter.
+                Quantity--;
+                quantityLabel.Text = Quantity.ToString();
+                totalPriceLabel.Text = $"{GetTotalCost()} kr";
+            };
 
             quantityLabel = new Label
             {
-                Text = quantity.ToString(),
+                Text = Quantity.ToString(),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 BackColor = Color.White,
@@ -192,7 +196,7 @@ namespace WFShop
             };
             table.Controls.Add(quantityLabel);
 
-            Button quantityAddButton = new Button
+            QuantityAddButton = new Button
             {
                 Text = "+",
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -201,10 +205,19 @@ namespace WFShop
                 BackColor = SetAccentColor(),
                 ForeColor = Color.White,
                 Margin = new Padding(0, 3, 3, 3),
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                // Tagga för enkel åtkomst.
+                Tag = ProductEntry,
+                Name = "QuantityAddButton"
             };
-            table.Controls.Add(quantityAddButton);
-            quantityAddButton.Click += (s, e) => Quantity++;
+            table.Controls.Add(QuantityAddButton);
+            QuantityAddButton.Click += (s, e) =>
+            {
+                // Ändrar inte antalet produkter.
+                Quantity++;
+                quantityLabel.Text = Quantity.ToString();
+                totalPriceLabel.Text = $"{GetTotalCost()} kr";
+            };
 
             return quantityPanel;
         }
@@ -221,7 +234,7 @@ namespace WFShop
         // Om controlFont inte har ett värde, sätt den till Arial.
         private string SetControlFont() => controlFont ?? "Arial";
 
-        public decimal GetTotalCost() => ProductEntry.Product.Price * quantity;
+        public decimal GetTotalCost() => ProductEntry.Product.Price * Quantity;
 
         public override string ToString() => $"CartItemBox describing: {ProductEntry.Product}";
 
@@ -229,8 +242,6 @@ namespace WFShop
         {
             throw new NotImplementedException();
         }
-
-        private void OnRemoveButtonClick(object sender, EventArgs e) => OnRemoveButtonClicked();
 
         private void OnProductNameLabelClick(object sender, EventArgs e)
         {

@@ -8,17 +8,20 @@ using System.Drawing;
 
 namespace WFShop
 {
-    class FileHandler
+    abstract class FileHandler
     {
-        public static List<Product> ReadProductsFromFile(string path)
+        public static string PathToProducts { get; set; }
+        public static string PathToCart { get; set; }
+
+        public static List<Product> GetProducts()
         { 
             List<Product> products = new List<Product>();
             string[] lines = Array.Empty<string>();
             // Kasta undantag ifall filen inte existerar.
-            if (File.Exists(path))
-                lines = File.ReadAllLines(path);
+            if (File.Exists(PathToProducts))
+                lines = File.ReadAllLines(PathToProducts);
             else
-                throw new FileNotFoundException($"Kunde inte hitta fil: {path}");
+                throw new FileNotFoundException($"Kunde inte hitta produktfilen:\n{PathToProducts}");
 
             foreach (var line in lines)
             {
@@ -56,22 +59,74 @@ namespace WFShop
         private static Image ReadImageFromFile() => throw new NotImplementedException();
 
         // Metoder som kan användas till att skapa ett kvitto och spara som en fil på datorn.
-        public static void CreateReceipt(List<Product> cart) => throw new NotImplementedException();
+        public static void CreateReceipt(ShoppingCart cart) => throw new NotImplementedException();
 
-        public static void CreateReceipt(List<Product> cart, string path) => throw new NotImplementedException();
+        public static void CreateReceipt(ShoppingCart cart, string path) => throw new NotImplementedException();
 
         // Metoder som kan användas till att spara varukorgen som en fil på datorn.
-        public static void SaveShoppingCart(List<Product> cart) => throw new NotImplementedException();
+        public static void SaveShoppingCart(ShoppingCart cart)
+        {
+            // Felhantereing kanske inte behövs?
+            if (!File.Exists(PathToCart))
+                throw new FileNotFoundException($"Kunde inte hitta fil: {PathToCart}");
+            List<string> lines = new List<string>();
+            foreach (ProductEntry productEntry in cart)
+                lines.Add($"{productEntry.Product.SerialNumber}#{productEntry.Amount}");
+            File.WriteAllLines(PathToCart, lines);            
+        }
 
-        public static void SaveShoppingCart(List<Product> cart, string path) => throw new NotImplementedException();
+        public static void SaveShoppingCart(ShoppingCart cart, string path) => throw new NotImplementedException();
 
         // Kan användas till att läsa in den sparade varukorgen när en ny instans av programmet skapas eller på användarens begäran.
-        public static List<Product> LoadShoppingCart(string path) => throw new NotImplementedException();
+        public static ShoppingCart GetShoppingCart()
+        {
+            ShoppingCart cart = new ShoppingCart();
+            foreach (ProductEntry productEntry in GetProductEntries())
+                cart.Add(productEntry.Product, productEntry.Amount);
 
-        // Läser från textfil med rabattkoder.
-        // Ska rabattkod dra av totalkostnaden eller av specifika produkter?
-        // Hur ska rabattkoder sammankopplas med dessa produkter?
+            return cart;
+        }
 
-        // public static ??? ReadCouponCodes(string path) => throw new NotImplementedException();
+        private static List<ProductEntry> GetProductEntries()
+        {
+            string[] lines = Array.Empty<string>();
+            if (!File.Exists(PathToCart))
+                throw new FileNotFoundException($"Kunde inte hitta varukorgen:\n{PathToCart}");
+            else
+                lines = File.ReadAllLines(PathToCart);
+
+            List<ProductEntry> productEntries = new List<ProductEntry>();
+            foreach (string line in lines)
+            {
+                string[] commaSeparatedValues = line.Split('#');
+                try
+                {
+                    int serialNumber = int.Parse(commaSeparatedValues[0]);
+                    int amount = int.Parse(commaSeparatedValues[1]);
+                    // GetProduct kan kasta ArgumentNullException om serienummret inte matchar någon produkt.
+                    productEntries.Add(new ProductEntry(GetProduct(serialNumber), amount));
+                }
+                catch (FormatException)
+                {
+                    string errorMessage = $"Rad \"{line}\" lästes inte in korrekt. Var god kontrollera källan.";
+                    Console.WriteLine(errorMessage);
+                }
+                catch (ArgumentNullException)
+                {
+                    string errorMessage = $"Serienummret '{commaSeparatedValues[0]}' refererar inte till någon produkt.";
+                    Console.WriteLine(errorMessage);
+                }
+                catch (Exception e)
+                {
+                    string errorMessage = $"Fångade oväntat fel på rad \"{line}\". Fördjupad felinformation:\n{e}";
+                    Console.WriteLine(errorMessage);
+                }
+            }
+
+            return productEntries;
+        }
+
+        // Omvandlar int till Product.
+        private static Product GetProduct(int serialNumber) => GetProducts().Find(x => x.SerialNumber == serialNumber);
     }
 }

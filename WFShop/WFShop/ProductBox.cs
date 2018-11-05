@@ -11,12 +11,11 @@ namespace WFShop
     class ProductBox : Control
     {
         // Control fields
-        private Button addToCartButton;
+        public Button AddToCartButton { get; set; }
 
         // Fields
         private Color accentColor;
         private string controlFont;
-        private Action OnAddToCartButtonClicked;
 
         // Control properties.
         public Product Product { get; }
@@ -27,7 +26,7 @@ namespace WFShop
             private get => accentColor;
             set
             {
-;               accentColor = value;
+                accentColor = value;
                 ReInitialise();
             }
         }
@@ -42,12 +41,9 @@ namespace WFShop
         }
 
         // Konstruktorn sätter defaultvärden eller tar emot valfria värden som sätter storleken på kontrollen.
-        public ProductBox(Product product, Action onAddToCartButtonClicked, int width = 250, int height = 300) :
-            base(text: "", left: 0, top: 0, width, height)
+        public ProductBox(Product product, int width = 250, int height = 300) : base(text: "", left: 0, top: 0, width, height)
         {
-            Product = product;
-            OnAddToCartButtonClicked = onAddToCartButtonClicked;
-            
+            Product = product;            
             Initialise();
         }
         
@@ -123,17 +119,17 @@ namespace WFShop
                 Dock = DockStyle.Fill
             });
 
-            addToCartButton = new Button
+            AddToCartButton = new Button
             {
                 Text = "Lägg till",
                 Font = new Font(SetControlFont(), 12, FontStyle.Bold),
                 BackColor = SetAccentColor(),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                Tag = Product
             };
-            table.Controls.Add(addToCartButton);
-            addToCartButton.Click += OnAddToCartButtonClick;
+            table.Controls.Add(AddToCartButton);
         }
 
         private void ReInitialise()
@@ -147,8 +143,6 @@ namespace WFShop
         private Color SetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
 
         private string SetControlFont() => controlFont ?? "Arial";
-
-        private void OnAddToCartButtonClick(object sender, EventArgs e) => OnAddToCartButtonClicked();
 
         private void OnProductThumbnailBoxClick(object sender, EventArgs e)
         {
