@@ -39,7 +39,7 @@ namespace WFShop
             set
             {
                 accentColor = value;
-                ReInitialise();
+                ReloadControl();
             }
         }
 
@@ -49,7 +49,7 @@ namespace WFShop
             set
             {
                 controlFont = value;
-                ReInitialise();
+                ReloadControl();
             }
         }
 
@@ -57,13 +57,11 @@ namespace WFShop
         {
             ProductEntry = productEntry;
             quantity = ProductEntry.Amount;
-            Initialise();
+            CreateControl();
         }
 
-        private void Initialise()
+        private void CreateControl()
         {
-            // TODO: Gör att kontrollen anpassar sig till förälderns storlek.
-
             Panel panel = new Panel { Dock = DockStyle.Fill };
             Controls.Add(panel);
 
@@ -140,7 +138,7 @@ namespace WFShop
                 Dock = DockStyle.Fill,
                 // Tagga för enkel åtkomst.
                 Tag = ProductEntry,
-                Name = "RemoveButton"
+                Name = nameof(RemoveButton)
             };
             table.Controls.Add(RemoveButton, 5, 0);
         }
@@ -179,7 +177,7 @@ namespace WFShop
                 Dock = DockStyle.Fill,
                 // Tagga för enkel åtkomst.
                 Tag = ProductEntry,
-                Name = "QuantitySubtractButton"
+                Name = nameof(QuantitySubtractButton)
             };
             table.Controls.Add(QuantitySubtractButton);
             QuantitySubtractButton.Click += (s, e) =>
@@ -213,7 +211,7 @@ namespace WFShop
                 Dock = DockStyle.Fill,
                 // Tagga för enkel åtkomst.
                 Tag = ProductEntry,
-                Name = "QuantityAddButton"
+                Name = nameof(QuantityAddButton)
             };
             table.Controls.Add(QuantityAddButton);
             QuantityAddButton.Click += (s, e) =>
@@ -227,10 +225,10 @@ namespace WFShop
             return quantityPanel;
         }
 
-        private void ReInitialise()
+        private void ReloadControl()
         {
             Controls.Clear();
-            Initialise();
+            CreateControl();
         }
 
         // Om accentColor är tomt sätt det till orange.

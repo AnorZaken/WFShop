@@ -31,7 +31,7 @@ namespace WFShop
         {
             FileHandler.PathToProducts = "productSortiment.csv";
             FileHandler.PathToCart = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\Temp\cart.csv";
-            FileHandler.PathToReceipt = "Receipt.txt";
+            FileHandler.PathToReceipt = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\receipt.txt";
 
             if (!File.Exists(FileHandler.PathToCart))
             {
@@ -104,9 +104,7 @@ namespace WFShop
             };
             mainTable.Controls.Add(sortPanel);
 
-            TableLayoutPanel sortTable = new TableLayoutPanel { ColumnCount = 4, Dock = DockStyle.Fill };
-            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            TableLayoutPanel sortTable = new TableLayoutPanel { ColumnCount = 2, Dock = DockStyle.Fill };
             sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
@@ -118,12 +116,13 @@ namespace WFShop
                 TextAlign = ContentAlignment.MiddleLeft,
                 Dock = DockStyle.Fill
             });
-            RadioButton sortByNameRadioButton = new RadioButton { Text = "Namn", Font = new Font("Arial", 12), CheckAlign = ContentAlignment.MiddleLeft };
-            sortTable.Controls.Add(sortByNameRadioButton);
-            RadioButton sortByCost = new RadioButton { Text = "Pris", Font = new Font("Arial", 12), CheckAlign = ContentAlignment.MiddleLeft };
-            sortTable.Controls.Add(sortByCost);
-            RadioButton sortByRelevance = new RadioButton { Text = "Relevans", Font = new Font("Arial", 12), CheckAlign = ContentAlignment.MiddleLeft };
-            sortTable.Controls.Add(sortByRelevance);
+
+            ComboBox sortComboBox = new ComboBox { Font = new Font("Arial", 12), Dock = DockStyle.Fill };
+            sortTable.Controls.Add(sortComboBox);
+            sortComboBox.Items.Add("Namn");
+            sortComboBox.Items.Add("Pris");
+            sortComboBox.SelectedIndexChanged += OnSortComboBoxIndexChanged;
+            // TODO: Läs in kategorier från textfil eller från List.            
 
             flowProductBoxView = new FlowLayoutPanel
             {
@@ -232,7 +231,10 @@ namespace WFShop
                 Dock = DockStyle.Fill
             };
             buttonTable.Controls.Add(checkoutButton);
-            checkoutButton.Click += (s, e) => new Form().Show();
+            checkoutButton.Click += (s, e) =>
+            {
+                FileHandler.CreateReceipt(cart);
+            };
 
             // Ladda om cartItemBoxView så att eventuella produkter i textfilen visas.
             RefreshCartItemBoxView();
@@ -244,6 +246,8 @@ namespace WFShop
             foreach (Product product in products)
             {
                 ProductBox p = new ProductBox(product, 200, 250);
+                //p.Thumbnail.Image = Image.FromFile("07311042000471.jpg");
+                //p.Thumbnail.BackgroundImage = Image.FromFile("07311042000471.jpg");
                 flowProductBoxView.Controls.Add(p);
                 p.AddToCartButton.Click += OnAnyButtonClick_ProductBox;
                 p.Thumbnail.Click += OnThumbnailClick_ProductBox;
@@ -276,6 +280,12 @@ namespace WFShop
                 textBox.BackColor = Color.Green;
             else
                 textBox.BackColor = Color.Red;
+        }
+
+        private void OnSortComboBoxIndexChanged(object sender, EventArgs e)
+        {
+            ComboBox comboBox = (ComboBox)sender;
+            int index = comboBox.SelectedIndex;
         }
 
         // ProductBox

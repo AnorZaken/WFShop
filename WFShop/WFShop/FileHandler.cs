@@ -60,7 +60,17 @@ namespace WFShop
         private static Image ReadImageFromFile() => throw new NotImplementedException();
 
         // Metoder som kan användas till att skapa ett kvitto och spara som en fil på datorn.
-        public static void CreateReceipt(ShoppingCart cart) => throw new NotImplementedException();
+        public static void CreateReceipt(ShoppingCart cart)
+        {
+            List<string> lines = new List<string>();
+            lines.Add("Kvitto\n");
+            foreach (ProductEntry productEntry in cart)
+            {
+                lines.Add($"{productEntry.Product.SerialNumber}: {productEntry.Amount} x {productEntry.Product.Name} à {productEntry.Product.Price} kr\n{productEntry.Product.Price * productEntry.Amount} kr\n");
+            }
+            lines.Add($"Totalt: {cart.FinalPrice} kr");
+            File.WriteAllLines(PathToReceipt, lines);
+        }
 
         public static void CreateReceipt(ShoppingCart cart, string path) => throw new NotImplementedException();
 
@@ -68,8 +78,8 @@ namespace WFShop
         public static void SaveShoppingCart(ShoppingCart cart)
         {
             // Felhantereing kanske inte behövs?
-            //if (!File.Exists(PathToCart))
-            //    throw new FileNotFoundException($"Kunde inte hitta fil: {PathToCart}");
+            if (!File.Exists(PathToCart))
+                throw new FileNotFoundException($"Kunde inte hitta fil: {PathToCart}");
             List<string> lines = new List<string>();
             foreach (ProductEntry productEntry in cart)
                 lines.Add($"{productEntry.Product.SerialNumber}#{productEntry.Amount}");
@@ -83,7 +93,14 @@ namespace WFShop
         {
             ShoppingCart cart = new ShoppingCart();
             foreach (ProductEntry productEntry in GetProductEntries())
-                cart.Add(productEntry.Product, productEntry.Amount);
+                try
+                {
+                    cart.Add(productEntry.Product, productEntry.Amount);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
 
             return cart;
         }

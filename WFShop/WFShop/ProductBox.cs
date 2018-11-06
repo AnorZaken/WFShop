@@ -80,6 +80,7 @@ namespace WFShop
             {
                 BackColor = SetAccentColor(),
                 Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.Zoom,
                 Margin = new Padding(0),
                 Cursor = Cursors.Hand
             };
@@ -128,7 +129,7 @@ namespace WFShop
                 FlatStyle = FlatStyle.Flat,
                 Dock = DockStyle.Fill,
                 Tag = Product,
-                Name = "AddToCartButton"
+                Name = nameof(AddToCartButton)
             };
             table.Controls.Add(AddToCartButton);
         }
