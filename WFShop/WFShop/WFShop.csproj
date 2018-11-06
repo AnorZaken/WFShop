@@ -55,6 +55,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Discount.cs" />
+    <Compile Include="Discounts\BuyXPayForY.cs" />
     <Compile Include="FileHandler.cs" />
     <Compile Include="IDiscount.cs" />
     <Compile Include="IDiscountParser.cs" />

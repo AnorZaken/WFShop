@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace WFShop
 {
@@ -83,7 +82,7 @@ namespace WFShop
         public static bool TryParse(IDictionary<string, string> parsedValues, out Discount discount)
         {
             foreach (var p in parsers)
-                if (p.TryParse(parsedValues, out discount))
+                if ((discount = p.ParseOrNull(parsedValues)) != null)
                     return true;
             discount = null;
             return false;
