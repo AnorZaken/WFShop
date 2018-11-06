@@ -36,7 +36,7 @@ namespace WFShop
                     string category = commaSeparatedValues[3];
                     string description = commaSeparatedValues[4];
                     // Ingen ny produkt läggs till om ett undantag kastas.
-                    products.Add(new Product(serialNumber, name, price, category, description));
+                    products.Add(Product.RegisterNew(serialNumber, name, price, category, description));
                 }
                 catch (FormatException)
                 {

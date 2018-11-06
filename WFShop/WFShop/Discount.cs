@@ -7,7 +7,7 @@ namespace WFShop
 {
     /* Förklaring av termer:
      * - Rebates - passiva rabatter, t.ex. "Erbjudande, köp 3 risifrutti betala för 2"
-     * - Coupons -  aktiva rabatter, t.ex. "20% off on your next purchase"
+     * - Coupons - aktiva rabatter, t.ex. "20% off on your next purchase"
      */
     abstract class Discount : IDiscount
     {
@@ -26,11 +26,11 @@ namespace WFShop
         public string Description { get; }
         public string CouponCode { get; }
         public string Type { get; }
-        public bool IsProductSpecific => ProductSerialNumber != -1;
+        public bool IsSingleProduct => ProductSerialNumber != -1;
         public int ProductSerialNumber { get; }
         protected bool IsRegistered { get; }
 
-        public abstract bool DoesApply(IReadOnlyDictionary<Product, int> cart);
+        public abstract bool IsApplicable(IReadOnlyDictionary<Product, int> cart);
         public abstract decimal Calculate(IReadOnlyDictionary<Product, int> cart);
 
         #region --- All Discounts (static) ---
@@ -39,8 +39,8 @@ namespace WFShop
          * - AllRebates: Alla passiva rabatter (appliceras automatiskt om de matchar varukorgen).
          */
 
-        private static HashSet<Discount> rebates = new HashSet<Discount>();
-        private static Dictionary<string, Discount> coupons = new Dictionary<string, Discount>(); // <CouponCode, Discount>
+        private static readonly HashSet<Discount> rebates = new HashSet<Discount>();
+        private static readonly Dictionary<string, Discount> coupons = new Dictionary<string, Discount>(); // <CouponCode, Discount>
 
         public static IReadOnlyCollection<Discount> AllRebates => rebates.ToArray();
         public static IReadOnlyCollection<Discount> AllCoupons => coupons.Values;
@@ -73,7 +73,7 @@ namespace WFShop
          * Alla discounts ligger sedan statiskt tillgängliga (se ovan).
          */
 
-        private static HashSet<IDiscountParser<Discount>> parsers = new HashSet<IDiscountParser<Discount>>();
+        private static readonly HashSet<IDiscountParser<Discount>> parsers = new HashSet<IDiscountParser<Discount>>();
 
         public static IReadOnlyCollection<IDiscountParser<Discount>> Parsers => parsers.ToArray();
 
