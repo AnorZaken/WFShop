@@ -12,6 +12,7 @@ namespace WFShop
     {
         public static string PathToProducts { get; set; }
         public static string PathToCart { get; set; }
+        public static string PathToReceipt { get; set; }
 
         public static List<Product> GetProducts()
         { 
@@ -67,8 +68,8 @@ namespace WFShop
         public static void SaveShoppingCart(ShoppingCart cart)
         {
             // Felhantereing kanske inte behövs?
-            if (!File.Exists(PathToCart))
-                throw new FileNotFoundException($"Kunde inte hitta fil: {PathToCart}");
+            //if (!File.Exists(PathToCart))
+            //    throw new FileNotFoundException($"Kunde inte hitta fil: {PathToCart}");
             List<string> lines = new List<string>();
             foreach (ProductEntry productEntry in cart)
                 lines.Add($"{productEntry.Product.SerialNumber}#{productEntry.Amount}");

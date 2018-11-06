@@ -64,7 +64,7 @@ namespace WFShop
         {
             // TODO: Gör att kontrollen anpassar sig till förälderns storlek.
 
-            Panel panel = new Panel { Dock = DockStyle.Fill, BorderStyle = BorderStyle.FixedSingle };
+            Panel panel = new Panel { Dock = DockStyle.Fill };
             Controls.Add(panel);
 
             TableLayoutPanel table = new TableLayoutPanel
@@ -81,11 +81,11 @@ namespace WFShop
             // Pris.
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
             // QuantityPanel-kontroller.
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
             // Totalpris.
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
             // Ta bort-knapp.
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 50));
             // Allt = 100%
 
             Thumbnail = new PictureBox
@@ -100,9 +100,10 @@ namespace WFShop
             Label productNameLabel = new Label
             {
                 Text = ProductEntry.Product.Name,
-                Font = new Font(SetControlFont(), 12, FontStyle.Bold),
+                Font = new Font(SetControlFont(), 8, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                Cursor = Cursors.Hand
             };
             table.Controls.Add(productNameLabel, 1, 0);
             productNameLabel.Click += OnProductNameLabelClick;
@@ -111,7 +112,7 @@ namespace WFShop
             table.Controls.Add(new Label
             {
                 Text = $"{ProductEntry.Product.Price} kr",
-                Font = new Font(SetControlFont(), 12, FontStyle.Bold),
+                Font = new Font(SetControlFont(), 8),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill
             }, 2, 0);
@@ -123,7 +124,7 @@ namespace WFShop
             {
                 Text = $"{GetTotalCost()} kr",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(SetControlFont(), 12, FontStyle.Bold),
+                Font = new Font(SetControlFont(), 8),
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(totalPriceLabel, 4, 0);
@@ -158,8 +159,11 @@ namespace WFShop
                 Dock = DockStyle.Fill
             };
             panel.Controls.Add(table);
+            // QuantitySubtractButton
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            // quantityLabel
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            // QuantityAddLabel
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
 

@@ -30,7 +30,20 @@ namespace WFShop
         public MyForm()
         {
             FileHandler.PathToProducts = "productSortiment.csv";
-            FileHandler.PathToCart = "cart.csv"; // TODO: Fixa så att man slipper mata in hela sökvägen.
+            FileHandler.PathToCart = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\Temp\cart.csv";
+            FileHandler.PathToReceipt = "Receipt.txt";
+
+            if (!File.Exists(FileHandler.PathToCart))
+            {
+                using (StreamWriter streamWriter = new StreamWriter(FileHandler.PathToCart))
+                {
+                    streamWriter.Write(string.Empty);
+                    streamWriter.Close(); // <- Lyckas inte stänga med File-klassen.
+                }
+                MessageBox.Show($"Skapade filen {FileHandler.PathToCart}.");
+                
+            }
+            cart = new ShoppingCart();
             try
             {
                 products = FileHandler.GetProducts();
@@ -86,7 +99,6 @@ namespace WFShop
 
             Panel sortPanel = new Panel
             {
-                //BackColor = Color.FromArgb(128, 128, 72),
                 Margin = new Padding(0),
                 Dock = DockStyle.Fill
             };
@@ -211,7 +223,7 @@ namespace WFShop
 
             Button checkoutButton = new Button
             {
-                Text = "Slutför",
+                Text = "Slutför beställning",
                 Font = new Font("Arial", 12, FontStyle.Bold),
                 BackColor = Color.Green,
                 ForeColor = Color.White,
@@ -220,45 +232,50 @@ namespace WFShop
                 Dock = DockStyle.Fill
             };
             buttonTable.Controls.Add(checkoutButton);
-            checkoutButton.Click += (s, e) => throw new NotImplementedException();
+            checkoutButton.Click += (s, e) => new Form().Show();
 
             // Ladda om cartItemBoxView så att eventuella produkter i textfilen visas.
             RefreshCartItemBoxView();
         }
-
 
         private void CreateProductBoxes(List<Product> products)
         {
             //Skapa ProductBox för varje produkt som finns i textfilen.
             foreach (Product product in products)
             {
-                ProductBox p = new ProductBox(product);
+                ProductBox p = new ProductBox(product, 200, 250);
                 flowProductBoxView.Controls.Add(p);
                 p.AddToCartButton.Click += OnAnyButtonClick_ProductBox;
                 p.Thumbnail.Click += OnThumbnailClick_ProductBox;
             }
         }
 
-
         private void RefreshCartItemBoxView()
         {
             cartItemBoxView.Controls.Clear();
             foreach (ProductEntry productEntry in cart)
             {
-                CartItemBox c = new CartItemBox(productEntry);
+                CartItemBox c = new CartItemBox(productEntry, cartItemBoxView.Width - 6);
                 cartItemBoxView.Controls.Add(c);
                 c.QuantityAddButton.Click += OnAnyButtonClick_CartItemBox;
                 c.QuantitySubtractButton.Click += OnAnyButtonClick_CartItemBox;
                 c.RemoveButton.Click += OnAnyButtonClick_CartItemBox;
                 c.Thumbnail.Click += OnThumbnailClick_CartItemBox;
-            }
 
+                splitContainer.SplitterMoved += (s, e) => c.Width = cartItemBoxView.Width - 6;
+            }
         }
 
         // this
         private void OnCouponCodeTextBoxChanged(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            TextBox textBox = (TextBox)sender;
+
+            // Test.
+            if (textBox.Text == "abc123")
+                textBox.BackColor = Color.Green;
+            else
+                textBox.BackColor = Color.Red;
         }
 
         // ProductBox
