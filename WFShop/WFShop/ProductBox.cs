@@ -12,6 +12,7 @@ namespace WFShop
     {
         // Control fields
         public Button AddToCartButton { get; set; }
+        public PictureBox Thumbnail { get; set; }
 
         // Fields
         private Color accentColor;
@@ -75,16 +76,15 @@ namespace WFShop
             // Knappen.
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
-            PictureBox productThumbnailBox = new PictureBox
+            Thumbnail = new PictureBox
             {
                 BackColor = SetAccentColor(),
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0),
                 Cursor = Cursors.Hand
             };
-            table.Controls.Add(productThumbnailBox);
-            table.SetColumnSpan(productThumbnailBox, 2);
-            productThumbnailBox.Click += OnProductThumbnailBoxClick;
+            table.Controls.Add(Thumbnail);
+            table.SetColumnSpan(Thumbnail, 2);
 
             Label productNameLabel = new Label
             {
@@ -127,7 +127,8 @@ namespace WFShop
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Dock = DockStyle.Fill,
-                Tag = Product
+                Tag = Product,
+                Name = "AddToCartButton"
             };
             table.Controls.Add(AddToCartButton);
         }
@@ -143,10 +144,5 @@ namespace WFShop
         private Color SetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
 
         private string SetControlFont() => controlFont ?? "Arial";
-
-        private void OnProductThumbnailBoxClick(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

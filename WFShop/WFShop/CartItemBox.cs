@@ -23,6 +23,7 @@ namespace WFShop
         public Button RemoveButton { get; set; }
         public Button QuantitySubtractButton { get; set; }
         public Button QuantityAddButton { get; set; }
+        public PictureBox Thumbnail { get; set; }
 
         // Properties
         public ProductEntry ProductEntry { get; set; }
@@ -87,14 +88,14 @@ namespace WFShop
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
             // Allt = 100%
 
-            PictureBox productThumbnail = new PictureBox
+            Thumbnail = new PictureBox
             {
                 BackColor = SetAccentColor(),
                 Margin = new Padding(0),
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                Cursor = Cursors.Hand
             };
-            table.Controls.Add(productThumbnail, 0, 0);
-            productThumbnail.Click += OnProductThumbnailClick;
+            table.Controls.Add(Thumbnail, 0, 0);
 
             Label productNameLabel = new Label
             {
@@ -237,11 +238,6 @@ namespace WFShop
         public decimal GetTotalCost() => ProductEntry.Product.Price * Quantity;
 
         public override string ToString() => $"CartItemBox describing: {ProductEntry.Product}";
-
-        private void OnProductThumbnailClick(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
         private void OnProductNameLabelClick(object sender, EventArgs e)
         {

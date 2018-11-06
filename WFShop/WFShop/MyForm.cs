@@ -160,13 +160,14 @@ namespace WFShop
                 TextAlign = ContentAlignment.MiddleLeft,
                 Dock = DockStyle.Fill
             });
-
+            
             couponCodeTextBox = new TextBox
             {
                 Font = new Font("Arial", 12),
                 Dock = DockStyle.Fill
             };
             cartViewTable.Controls.Add(couponCodeTextBox);
+            couponCodeTextBox.TextChanged += OnCouponCodeTextBoxChanged;
 
             cartViewTable.Controls.Add(new Label
             {
@@ -208,7 +209,7 @@ namespace WFShop
             buttonTable.Controls.Add(saveCartButton);
             saveCartButton.Click += (s, e) => FileHandler.SaveShoppingCart(cart);
 
-            Button checkOutButton = new Button
+            Button checkoutButton = new Button
             {
                 Text = "Slutför",
                 Font = new Font("Arial", 12, FontStyle.Bold),
@@ -218,11 +219,13 @@ namespace WFShop
                 Margin = new Padding(0),
                 Dock = DockStyle.Fill
             };
-            buttonTable.Controls.Add(checkOutButton);
+            buttonTable.Controls.Add(checkoutButton);
+            checkoutButton.Click += (s, e) => throw new NotImplementedException();
 
             // Ladda om cartItemBoxView så att eventuella produkter i textfilen visas.
             RefreshCartItemBoxView();
         }
+
 
         private void CreateProductBoxes(List<Product> products)
         {
@@ -231,7 +234,8 @@ namespace WFShop
             {
                 ProductBox p = new ProductBox(product);
                 flowProductBoxView.Controls.Add(p);
-                p.AddToCartButton.Click += OnAddToCartButtonClick;
+                p.AddToCartButton.Click += OnAnyButtonClick_ProductBox;
+                p.Thumbnail.Click += OnThumbnailClick_ProductBox;
             }
         }
 
@@ -243,24 +247,41 @@ namespace WFShop
             {
                 CartItemBox c = new CartItemBox(productEntry);
                 cartItemBoxView.Controls.Add(c);
-                c.QuantityAddButton.Click += OnAnyButtonClickInCartItemBox;
-                c.QuantitySubtractButton.Click += OnAnyButtonClickInCartItemBox;
-                c.RemoveButton.Click += OnAnyButtonClickInCartItemBox;
+                c.QuantityAddButton.Click += OnAnyButtonClick_CartItemBox;
+                c.QuantitySubtractButton.Click += OnAnyButtonClick_CartItemBox;
+                c.RemoveButton.Click += OnAnyButtonClick_CartItemBox;
+                c.Thumbnail.Click += OnThumbnailClick_CartItemBox;
             }
 
         }
 
-        // ProductBox
-        private void OnAddToCartButtonClick(object sender, EventArgs e)
+        // this
+        private void OnCouponCodeTextBoxChanged(object sender, EventArgs e)
         {
-            Product product = (Product)(sender as Button).Tag;
-            cart.Add(product);
-            totalCostLabel.Text = $"{cart.FinalPrice} kr";
-            RefreshCartItemBoxView();
+            throw new NotImplementedException();
+        }
+
+        // ProductBox
+        private void OnAnyButtonClick_ProductBox(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            Product product = (Product)button.Tag;
+
+            if (button.Name == "AddToCartButton")
+            {
+                cart.Add(product);
+                totalCostLabel.Text = $"{cart.FinalPrice} kr";
+                RefreshCartItemBoxView();
+            }
+        }
+
+        private void OnThumbnailClick_ProductBox(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         // CartItemBox
-        private void OnAnyButtonClickInCartItemBox(object sender, EventArgs e)
+        private void OnAnyButtonClick_CartItemBox(object sender, EventArgs e)
         {
             Button button = (Button)sender;
             ProductEntry productEntry = (ProductEntry)button.Tag;
@@ -281,6 +302,11 @@ namespace WFShop
                 totalCostLabel.Text = $"{cart.FinalPrice} kr";
                 RefreshCartItemBoxView();
             }
+        }
+
+        private void OnThumbnailClick_CartItemBox(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }
