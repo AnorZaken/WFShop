@@ -53,7 +53,7 @@ namespace WFShop
             => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
 
         protected IEnumerable<Discount> FindApplicableRebates()
-            => Discount.AllRebates.Where(d => d.DoesApply(cart));
+            => Discount.AllRebates.Where(d => d.IsApplicable(cart));
 
         protected decimal CalculateDiscountValue()
             => AppliedRebates.Sum(d => d.Calculate(cart)) + appliedCoupons.Sum(d => d.Calculate(cart));

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace WFShop
 {
-    class Product : IEquatable<Product>
+    partial class Product : IEquatable<Product>
     {
         public int SerialNumber { get; }
         public string Name { get; }
@@ -12,7 +12,7 @@ namespace WFShop
         public ProductCategory Category { get; }
         public string Description { get; }
 
-        public Product(int serialNumber, string name, decimal price, string category , string desc)
+        private Product(int serialNumber, string name, decimal price, string category , string desc)
         {
             SerialNumber = serialNumber;
             Name = name;
@@ -21,9 +21,30 @@ namespace WFShop
             Description = desc;
         }
 
-        // Beteende: det som avgör likhet är serienummer, pris, och namn - inget annat!
+        // Create and register a new product.
+        // (So it becomes accessible from the AllProducts property and the TryGet method.)
+        public static Product RegisterNew(int serialNumber, string name, decimal price, string category, string desc)
+        {
+            var pNew = new Product(serialNumber, name, price, category, desc);
+            try
+            {
+                products.Add(serialNumber, pNew);
+            }
+            catch (ArgumentException)
+            {
+                var pOld = products[serialNumber];
+                throw new DuplicateException(pOld, pNew);
+            }
+            return pNew;
+        }
+
+        // Likhet ignorerar Description!
         public bool Equals(Product other)
-            => other != null && (SerialNumber == other.SerialNumber & Price == other.Price & Name == other.Name);
+            => !(other is null) &&
+            ( SerialNumber == other.SerialNumber
+            & Price == other.Price
+            & Name == other.Name
+            & Category == other.Category );
 
         public override bool Equals(object obj)
             => obj is Product other && this.Equals(other);
@@ -39,6 +60,15 @@ namespace WFShop
         public override string ToString()
             => $"{Name ?? "<Unknown Product>"} ({SerialNumber})";
 
-        // TODO ...
+        #region --- All Products (static) ---
+        /* Alla produkter ligger efter konstruktion statiskt tillgängliga i Product klassen. */
+        private static readonly Dictionary<int /*SerialNumber*/, Product> products = new Dictionary<int, Product>();
+
+        public static IReadOnlyCollection<Product> AllProducts => products.Values;
+
+        // Try get a Product from a serial number.
+        public static bool TryGet(int serialNumber, out Product product)
+            => products.TryGetValue(serialNumber, out product);
+        #endregion
     }
 }
