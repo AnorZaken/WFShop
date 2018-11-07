@@ -62,8 +62,7 @@ namespace WFShop
         // Metoder som kan användas till att skapa ett kvitto och spara som en fil på datorn.
         public static void CreateReceipt(ShoppingCart cart)
         {
-            List<string> lines = new List<string>();
-            lines.Add("Kvitto\n");
+            List<string> lines = new List<string> { "Kvitto\n" };
             foreach (ProductEntry productEntry in cart)
             {
                 lines.Add($"{productEntry.Product.SerialNumber}: {productEntry.Amount} x {productEntry.Product.Name} à {productEntry.Product.Price} kr\n{productEntry.Product.Price * productEntry.Amount} kr\n");

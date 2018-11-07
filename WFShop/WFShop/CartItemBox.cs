@@ -88,6 +88,7 @@ namespace WFShop
 
             Thumbnail = new PictureBox
             {
+                SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = SetAccentColor(),
                 Margin = new Padding(0),
                 Dock = DockStyle.Fill,

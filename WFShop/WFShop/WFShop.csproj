@@ -56,8 +56,10 @@
     </Compile>
     <Compile Include="Discount.cs" />
     <Compile Include="FileHandler.cs" />
+    <Compile Include="GUI.cs" />
     <Compile Include="IDiscount.cs" />
     <Compile Include="IDiscountParser.cs" />
+    <Compile Include="ImageHandler.cs" />
     <Compile Include="MyForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,15 +85,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="07311042000471.jpg">
+    <Content Include="Images\167984231.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Orange-Fruit-Pieces.jpg">
+    <Content Include="Images\273984130.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\no-image.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Receipt.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

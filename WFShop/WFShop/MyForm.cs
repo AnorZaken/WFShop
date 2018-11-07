@@ -32,6 +32,7 @@ namespace WFShop
             FileHandler.PathToProducts = "productSortiment.csv";
             FileHandler.PathToCart = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\Temp\cart.csv";
             FileHandler.PathToReceipt = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\receipt.txt";
+            ImageHandler.PathToFolder = Environment.CurrentDirectory + @"\Images";
 
             if (!File.Exists(FileHandler.PathToCart))
             {
@@ -246,9 +247,8 @@ namespace WFShop
             foreach (Product product in products)
             {
                 ProductBox p = new ProductBox(product, 200, 250);
-                //p.Thumbnail.Image = Image.FromFile("07311042000471.jpg");
-                //p.Thumbnail.BackgroundImage = Image.FromFile("07311042000471.jpg");
                 flowProductBoxView.Controls.Add(p);
+                p.Thumbnail.Image = ImageHandler.LoadImage(product.SerialNumber) ?? ImageHandler.Default;
                 p.AddToCartButton.Click += OnAnyButtonClick_ProductBox;
                 p.Thumbnail.Click += OnThumbnailClick_ProductBox;
             }
@@ -261,6 +261,7 @@ namespace WFShop
             {
                 CartItemBox c = new CartItemBox(productEntry, cartItemBoxView.Width - 6);
                 cartItemBoxView.Controls.Add(c);
+                c.Thumbnail.Image = ImageHandler.LoadImage(productEntry.Product.SerialNumber) ?? ImageHandler.Default;
                 c.QuantityAddButton.Click += OnAnyButtonClick_CartItemBox;
                 c.QuantitySubtractButton.Click += OnAnyButtonClick_CartItemBox;
                 c.RemoveButton.Click += OnAnyButtonClick_CartItemBox;
