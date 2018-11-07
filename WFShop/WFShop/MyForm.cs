@@ -59,11 +59,11 @@ namespace WFShop
             Text = "<App Name>";
             Size = new Size(1000, 500);
 
-            CreateGUI();
+            Initialize();
         }
 
         // Rita upp GUI:t.
-        private void CreateGUI()
+        private void Initialize()
         {
             splitContainer = new SplitContainer
             {
@@ -80,11 +80,11 @@ namespace WFShop
             CreateProductBoxes(products);
         }
 
-        // Töm och rita om GUI:t.
-        private void Reinitialise()
+        // Förstör och återskapa inre kontroller.
+        private void ReInitialize()
         {
             Controls.Clear();
-            CreateGUI();
+            Initialize();
         }
 
         private void CreatePanel1Controls()

@@ -57,10 +57,10 @@ namespace WFShop
         {
             ProductEntry = productEntry;
             quantity = ProductEntry.Amount;
-            CreateControl();
+            Initialize();
         }
 
-        private void CreateControl()
+        private void Initialize()
         {
             Panel panel = new Panel { Dock = DockStyle.Fill };
             Controls.Add(panel);
@@ -229,7 +229,7 @@ namespace WFShop
         private void ReloadControl()
         {
             Controls.Clear();
-            CreateControl();
+            Initialize();
         }
 
         // Om accentColor är tomt sätt det till orange.

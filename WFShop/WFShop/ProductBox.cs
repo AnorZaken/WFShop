@@ -45,11 +45,11 @@ namespace WFShop
         public ProductBox(Product product, int width = 250, int height = 300) : base(text: "", left: 0, top: 0, width, height)
         {
             Product = product;            
-            Initialise();
+            Initialize();
         }
         
         // Rita upp ProductBox-instansen.
-        private void Initialise()
+        private void Initialize()
         {
             Panel panel = new Panel { Dock = DockStyle.Fill, BorderStyle = BorderStyle.FixedSingle };
             Controls.Add(panel);
@@ -137,7 +137,7 @@ namespace WFShop
         private void ReInitialise()
         {
             Controls.Clear();
-            Initialise();
+            Initialize();
         }
 
         public override string ToString() => $"ProductBox describing: {Product}";
