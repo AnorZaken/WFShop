@@ -18,6 +18,7 @@ namespace WFShop
         private FlowLayoutPanel cartItemBoxView;
         private TextBox couponCodeTextBox;
         private Label totalCostLabel;
+        private ComboBox sortComboBox;
 
         // Fields
         private List<Product> products;
@@ -118,10 +119,12 @@ namespace WFShop
                 Dock = DockStyle.Fill
             });
 
-            ComboBox sortComboBox = new ComboBox { Font = new Font("Arial", 12), Dock = DockStyle.Fill };
+            sortComboBox = new ComboBox { Font = new Font("Arial", 12), Dock = DockStyle.Fill };
             sortTable.Controls.Add(sortComboBox);
-            sortComboBox.Items.Add("Namn");
-            sortComboBox.Items.Add("Pris");
+            //sortComboBox.Items.Add("Namn");
+            //sortComboBox.Items.Add("Pris");
+            var categories = products.Select(p => p.Category.Name);
+            //sortComboBox.Items.AddRange(categories.ToArray());
             sortComboBox.SelectedIndexChanged += OnSortComboBoxIndexChanged;
             // TODO: Läs in kategorier från textfil eller från List.            
 
