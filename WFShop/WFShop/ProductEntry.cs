@@ -7,6 +7,8 @@ namespace WFShop
         public readonly Product Product;
         public readonly int Amount;
 
+        public int SerialNumber => Product?.SerialNumber ?? -1;
+
         public ProductEntry(Product product, int amount)
         {
             Product = product;

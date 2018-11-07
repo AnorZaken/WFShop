@@ -257,15 +257,18 @@ namespace WFShop
         private void RefreshCartItemBoxView()
         {
             cartItemBoxView.Controls.Clear();
-            foreach (ProductEntry productEntry in cart)
+            foreach (ProductEntry pe in cart)
             {
-                CartItemBox c = new CartItemBox(productEntry, cartItemBoxView.Width - 6);
+                CartItemBox c = new CartItemBox(pe, cartItemBoxView.Width - 6);
                 cartItemBoxView.Controls.Add(c);
-                c.Thumbnail.Image = ImageHandler.LoadImage(productEntry.Product.SerialNumber) ?? ImageHandler.Default;
+                c.Thumbnail.Image = ImageHandler.LoadImage(pe.SerialNumber) ?? ImageHandler.Default;
                 c.QuantityAddButton.Click += OnAnyButtonClick_CartItemBox;
                 c.QuantitySubtractButton.Click += OnAnyButtonClick_CartItemBox;
                 c.RemoveButton.Click += OnAnyButtonClick_CartItemBox;
                 c.Thumbnail.Click += OnThumbnailClick_CartItemBox;
+
+                if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
+                    c.SetDiscountInfo(de);
 
                 splitContainer.SplitterMoved += (s, e) => c.Width = cartItemBoxView.Width - 6;
             }
@@ -312,24 +315,37 @@ namespace WFShop
         private void OnAnyButtonClick_CartItemBox(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            ProductEntry productEntry = (ProductEntry)button.Tag;
+            ProductEntry pe = (ProductEntry)button.Tag;
 
             if (button.Name == "QuantityAddButton")
             {
-                cart.Add(productEntry.Product);
+                cart.Add(pe.Product);
                 totalCostLabel.Text = $"{cart.FinalPrice} kr";
+                var c = GetCartItemBox();
+                if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
+                    c.SetDiscountInfo(de);
             }
             else if (button.Name == "QuantitySubtractButton")
             {
-                cart.Remove(productEntry.Product, 1);
+                cart.Remove(pe.Product, 1);
                 totalCostLabel.Text = $"{cart.FinalPrice} kr";
+                var c = GetCartItemBox();
+                if (c.HasDiscountInfo)
+                {
+                    cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de);
+                    c.SetDiscountInfo(de);
+                }
             }
             else if (button.Name == "RemoveButton")
             {
-                cart.RemoveAll(productEntry.Product);
+                cart.RemoveAll(pe.Product);
                 totalCostLabel.Text = $"{cart.FinalPrice} kr";
                 RefreshCartItemBoxView();
             }
+
+            // lokal metod för att undvika kod-duplicering:
+            CartItemBox GetCartItemBox()
+                => (CartItemBox)(button.Parent.Parent.Parent.Parent.Parent.Parent);
         }
 
         private void OnThumbnailClick_CartItemBox(object sender, EventArgs e)

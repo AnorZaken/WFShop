@@ -124,6 +124,9 @@ namespace WFShop
         public IEnumerable<ProductEntry> Products
             => this;
 
+        public IReadOnlyDictionary<Product, int> ProductsDict
+            => cart; // <-- dålig kodstil. TODO!
+
         public IReadOnlyCollection<IDiscount> AppliedCoupons
             => appliedCoupons.ToArray();
 
@@ -131,6 +134,17 @@ namespace WFShop
             => isDirtyArticles
             ? p_appliedRebates = FindApplicableRebates().ToArray()
             : p_appliedRebates;
+
+        public bool HasRebate(int productSerialNumber) // TODO - fixa bättre!
+            => AppliedRebates.Any(d => d.ProductSerialNumber == productSerialNumber);
+
+        public bool TryGetRebate(int productSerialNumber, out DiscountEntry discountEntry)
+        {
+            // TODO - fixa bättre!
+            var r = AppliedRebates.FirstOrDefault(d => d.ProductSerialNumber == productSerialNumber);
+            discountEntry = r == null ? default : new DiscountEntry(r, r.Calculate(cart));
+            return r != null;
+        }
 
         IEnumerator<ProductEntry> IEnumerable<ProductEntry>.GetEnumerator()
             => cart

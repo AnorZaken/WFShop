@@ -60,12 +60,14 @@ namespace WFShop
             Initialize();
         }
 
+        private TableLayoutPanel table;
+
         private void Initialize()
         {
             Panel panel = new Panel { Dock = DockStyle.Fill };
             Controls.Add(panel);
 
-            TableLayoutPanel table = new TableLayoutPanel
+            table = new TableLayoutPanel
             {
                 RowCount = 1,
                 Dock = DockStyle.Fill
@@ -142,6 +144,43 @@ namespace WFShop
                 Name = nameof(RemoveButton)
             };
             table.Controls.Add(RemoveButton, 5, 0);
+        }
+
+        public bool HasDiscountInfo
+            => table.RowCount == 2;
+
+        private Control discount = null;
+
+        public void RemoveDiscontInfo()
+        {
+            if (HasDiscountInfo)
+            {
+                table.Controls.Remove(discount);
+                table.RowCount = 1;
+                //table.Height /= 2;
+                Height /= 2;
+            }
+        }
+
+        public void SetDiscountInfo(DiscountEntry discountEntry) // TODO!
+        {
+            if (discountEntry.Amount == 0)
+            {
+                RemoveDiscontInfo();
+            }
+            else if (HasDiscountInfo)
+            {
+                discount.Text = discountEntry.ToString();
+            }
+            else
+            {
+                table.RowCount = 2;
+                //table.Height *= 2;
+                Height *= 2;
+                discount = new Label() { Text = discountEntry.ToString(), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleRight };
+                table.SetColumnSpan(discount, 6);
+                table.Controls.Add(discount, 0, 1);
+            }
         }
 
         private Control CreateQuantityPanel()
