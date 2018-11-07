@@ -4,8 +4,9 @@ using System.Linq;
 
 namespace WFShop
 {
-    interface IDiscountParser<T> where T : IDiscount
+    interface IDiscountParser<out T> where T : class, IDiscount
     {
-        bool TryParse(IDictionary<string, string> parsedValues, out T discount);
+        // Parses and returns an appropriate discount instance if possible; otherwise returns null.
+        T ParseOrNull(IDictionary<string, string> parsedValues);
     }
 }
