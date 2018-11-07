@@ -88,10 +88,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Images\273984130.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\167984231.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\273984130.jpg">
+    <Content Include="Images\791234787.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\no-image.jpg">

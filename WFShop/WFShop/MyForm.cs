@@ -106,9 +106,11 @@ namespace WFShop
             };
             mainTable.Controls.Add(sortPanel);
 
-            TableLayoutPanel sortTable = new TableLayoutPanel { ColumnCount = 2, Dock = DockStyle.Fill };
-            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            TableLayoutPanel sortTable = new TableLayoutPanel { ColumnCount = 4, Dock = DockStyle.Fill };
+            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
 
             sortPanel.Controls.Add(sortTable);
             sortTable.Controls.Add(new Label
@@ -119,12 +121,18 @@ namespace WFShop
                 Dock = DockStyle.Fill
             });
 
-            sortComboBox = new ComboBox { Font = new Font("Arial", 12), Dock = DockStyle.Fill };
+            RadioButton sortByNameRadioButton = new RadioButton { Text = "Namn", Font = new Font("Arial", 12) };
+            sortTable.Controls.Add(sortByNameRadioButton);
+
+            RadioButton sortByPrice = new RadioButton { Text = "Pris", Font = new Font("Arial", 12) };
+            sortTable.Controls.Add(sortByPrice);
+
+            sortComboBox = new ComboBox { Font = new Font("Arial", 12), Sorted = true, Dock = DockStyle.Fill };
             sortTable.Controls.Add(sortComboBox);
-            //sortComboBox.Items.Add("Namn");
-            //sortComboBox.Items.Add("Pris");
-            var categories = products.Select(p => p.Category.Name);
-            //sortComboBox.Items.AddRange(categories.ToArray());
+
+            // Returnera en IEnumerable med unika kategorier.
+            IEnumerable<string> categories = products.Select(p => p.Category.Name).Distinct(); 
+            sortComboBox.Items.AddRange(categories.ToArray());
             sortComboBox.SelectedIndexChanged += OnSortComboBoxIndexChanged;
             // TODO: Läs in kategorier från textfil eller från List.            
 
