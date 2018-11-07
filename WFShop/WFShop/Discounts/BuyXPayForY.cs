@@ -5,7 +5,7 @@ namespace WFShop.Discounts
 {
     class BuyXPayForY : Discount
     {
-        const string TYPE = "BX4PY";
+        const string TYPE = "BXP4Y";
 
         private BuyXPayForY(string name, string desc, int productSerialNumber, int buyX, int payY)
             : base(name, desc, TYPE, productSerialNumber)
