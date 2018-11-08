@@ -49,6 +49,7 @@ namespace WFShop
             try
             {
                 products = FileHandler.GetProducts();
+                // TODO: Logiskt fel uppstår på raden nedan. Programmet hittar och läser filer, men produkterna som returneras är null.
                 cart = FileHandler.GetShoppingCart();
             }
             catch (FileNotFoundException e)
