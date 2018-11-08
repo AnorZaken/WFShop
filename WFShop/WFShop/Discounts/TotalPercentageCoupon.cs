@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace WFShop.Discounts
 {
@@ -50,6 +51,8 @@ namespace WFShop.Discounts
 
             public TotalPercentageCoupon ParseOrNull(IDictionary<string, string> parsedValues)
             {
+                var style = NumberStyles.Integer;
+                var culture = CultureInfo.InvariantCulture;
                 if (parsedValues.Count == keys.Length &&
                     parsedValues.TryGetValue(keys[0], out string type) &&
                     StringComparer.OrdinalIgnoreCase.Equals(type, TYPE) &&
@@ -58,8 +61,8 @@ namespace WFShop.Discounts
                     parsedValues.TryGetValue(keys[3], out string couponCode) &&
                     parsedValues.TryGetValue(keys[4], out string s_percent) &&
                     parsedValues.TryGetValue(keys[5], out string s_minValue) &&
-                    decimal.TryParse(s_percent, out decimal percentage) &&
-                    decimal.TryParse(s_minValue, out decimal minValue))
+                    decimal.TryParse(s_percent, style, culture, out decimal percentage) &&
+                    decimal.TryParse(s_minValue, style, culture, out decimal minValue))
                 {
                     couponCode = couponCode?.Trim();
                     if (!(couponCode?.Length >= 3))

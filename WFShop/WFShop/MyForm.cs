@@ -53,7 +53,8 @@ namespace WFShop
                 if (!FileHandler.HasProductsLoaded)
                     FileHandler.LoadProducts();
                 products = Product.AllProducts;
-                cart = FileHandler.GetShoppingCart();
+                // TODO: Logiskt fel uppstår på raden nedan. Programmet hittar och läser filer, men produkterna som returneras är null.
+                cart = FileHandler.LoadShoppingCart();
             }
             catch (FileNotFoundException e)
             {
@@ -267,11 +268,20 @@ namespace WFShop
             buttonTable.Controls.Add(checkoutButton);
             checkoutButton.Click += (s, e) =>
             {
-                FileHandler.CreateReceipt(cart);
+                FileHandler.SaveReceipt(cart);
+                MessageBox.Show("Kvittot har sparats till:\n" + $"\"{FileHandler.PathToReceipt}\"");
+                ClearCart();
             };
 
             // Ladda om cartItemBoxView så att eventuella produkter i textfilen visas.
             RefreshCartItemBoxView();
+        }
+
+        private void ClearCart()
+        {
+            cart.Clear();
+            RefreshCartItemBoxView();
+            RefreshTotalCost();
         }
 
         private void CreateProductBoxes(IReadOnlyCollection<Product> products, string filter = "Alla", string sortBy = null)
@@ -348,10 +358,13 @@ namespace WFShop
             if (button.Name == "AddToCartButton")
             {
                 cart.Add(product);
-                totalCostLabel.Text = $"{cart.FinalPrice} kr";
+                RefreshTotalCost();
                 RefreshCartItemBoxView();
             }
         }
+
+        private void RefreshTotalCost()
+            => totalCostLabel.Text = $"{cart.FinalPrice} kr";
 
         private void OnThumbnailClick_ProductBox(object sender, EventArgs e)
         {
@@ -374,7 +387,7 @@ namespace WFShop
             if (button.Name == "QuantityAddButton")
             {
                 cart.Add(pe.Product);
-                totalCostLabel.Text = $"{cart.FinalPrice} kr";
+                RefreshTotalCost();
                 var c = GetCartItemBox();
                 if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
                     c.SetDiscountInfo(de);
@@ -383,7 +396,7 @@ namespace WFShop
             {
                 // TODO: OBS! OBS! OBS! Quantity i CartItemBox blir nu större än 0, men det kan fortfarande finnas 0 st av en vara.
                 cart.Remove(pe.Product, 1);
-                totalCostLabel.Text = $"{cart.FinalPrice} kr";
+                RefreshTotalCost();
                 var c = GetCartItemBox();
                 if (c.HasDiscountInfo)
                 {
@@ -394,7 +407,7 @@ namespace WFShop
             else if (button.Name == "RemoveButton")
             {
                 cart.RemoveAll(pe.Product);
-                totalCostLabel.Text = $"{cart.FinalPrice} kr";
+                RefreshTotalCost();
                 RefreshCartItemBoxView();
             }
 
