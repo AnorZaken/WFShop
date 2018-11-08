@@ -149,6 +149,7 @@ namespace WFShop
             filterComboBox.Items.Add("Alla");
             filterComboBox.Items.AddRange(categories.ToArray());
             filterComboBox.SelectedIndexChanged += (s, e) => RefreshProductBoxView();
+            filterComboBox.SelectedItem = filterComboBox.Items[0];
             // TODO: Läs in kategorier från textfil eller från List.            
         }
 
@@ -273,19 +274,18 @@ namespace WFShop
         private void CreateProductBoxes(IReadOnlyCollection<Product> products, string filter = "Alla", string sortBy = null)
         {
             //Skapa ProductBox för varje produkt som finns i textfilen.
-            // Rensa flowProductBoxView när metoden anropas.
-            //flowProductBoxView.Controls.Clear();
+            
             // IEnumerable som innehåller filtrerad version av product-listan.
             IEnumerable<Product> filteredProducts = 
                 filter == "Alla" || filter is null 
                 ? products.Select(p => p) 
                 : products.Where(p => p.Category.Name == filter);
 
+            // IEnumerable som innehåller en sorterad version av product-listan.
             IEnumerable<Product> orderedProducts = 
                 sortBy is "Name" ? filteredProducts.OrderBy(p => p.Name) : 
                 sortBy is "Price" ? filteredProducts.OrderBy(p => p.Price) : 
-                filteredProducts;
-           
+                filteredProducts;           
 
             foreach (Product product in orderedProducts)
             {
@@ -397,11 +397,6 @@ namespace WFShop
         private void OnThumbnailClick_CartItemBox(object sender, EventArgs e)
         {
             throw new NotImplementedException(); //TODO!
-        }
-
-        enum SortBy
-        {
-            Name, Price, Unspecified
         }
     }
 }
