@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace WFShop.Discounts
 {
@@ -52,6 +53,8 @@ namespace WFShop.Discounts
 
             public BuyXPayForY ParseOrNull(IDictionary<string, string> parsedValues)
             {
+                var style = NumberStyles.Integer;
+                var culture = CultureInfo.InvariantCulture;
                 if (parsedValues.Count == keys.Length &&
                     parsedValues.TryGetValue(keys[0], out string type) &&
                     StringComparer.OrdinalIgnoreCase.Equals(type, TYPE) &&
@@ -60,9 +63,9 @@ namespace WFShop.Discounts
                     parsedValues.TryGetValue(keys[3], out string s_psn) &&
                     parsedValues.TryGetValue(keys[4], out string s_buy) &&
                     parsedValues.TryGetValue(keys[5], out string s_pay) &&
-                    int.TryParse(s_psn, out int psn) &&
-                    int.TryParse(s_buy, out int buy) &&
-                    int.TryParse(s_pay, out int pay))
+                    int.TryParse(s_psn, style, culture, out int psn) &&
+                    int.TryParse(s_buy, style, culture, out int buy) &&
+                    int.TryParse(s_pay, style, culture, out int pay))
                 {
                     if (pay <= 0 || buy <= pay)
                         throw new FormatException("Requirement unmet: Buy quantity > Pay quantity > 0");

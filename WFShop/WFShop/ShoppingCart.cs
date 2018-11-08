@@ -85,6 +85,9 @@ namespace WFShop
         public bool RemoveCoupon(string couponCode)
             => Discount.TryGetCoupon(couponCode, out Discount d) && RemoveCoupon(d);
 
+        public void Add(ProductEntry productEntry)
+            => Add(productEntry.Product, productEntry.Amount);
+
         public void Add(Product product, int amount = 1)
         {
             if (amount < 1)
@@ -103,7 +106,13 @@ namespace WFShop
             return b;
         }
 
-        public bool Remove(Product product, int amount)
+        public void Clear()
+        {
+            cart.Clear();
+            isDirtyArticles = true;
+        }
+
+        public bool Remove(Product product, int amount = 1)
         {
             if (amount < 1)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Cannot remove less than one product.");
