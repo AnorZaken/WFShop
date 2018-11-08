@@ -20,7 +20,7 @@ namespace WFShop
         private Label totalCostLabel;
 
         // Fields
-        private List<Product> products;
+        private IReadOnlyCollection<Product> products;
 
         // Control properties
 
@@ -47,7 +47,9 @@ namespace WFShop
             cart = new ShoppingCart();
             try
             {
-                products = FileHandler.GetProducts();
+                if (!FileHandler.HasProductsLoaded)
+                    FileHandler.LoadProducts();
+                products = Product.AllProducts;
                 cart = FileHandler.GetShoppingCart();
             }
             catch (FileNotFoundException e)
@@ -241,7 +243,7 @@ namespace WFShop
             RefreshCartItemBoxView();
         }
 
-        private void CreateProductBoxes(List<Product> products)
+        private void CreateProductBoxes(IReadOnlyCollection<Product> products)
         {
             //Skapa ProductBox för varje produkt som finns i textfilen.
             foreach (Product product in products)

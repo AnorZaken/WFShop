@@ -14,50 +14,60 @@ namespace WFShop
         public static string PathToCart { get; set; }
         public static string PathToReceipt { get; set; }
 
-        public static List<Product> GetProducts()
-        { 
-            List<Product> products = new List<Product>();
-            string[] lines = Array.Empty<string>();
-            // Kasta undantag ifall filen inte existerar.
-            if (File.Exists(PathToProducts))
-                lines = File.ReadAllLines(PathToProducts);
-            else
-                throw new FileNotFoundException($"Kunde inte hitta produktfilen:\n{PathToProducts}");
+        public static bool HasProductsLoaded { get; private set; }
 
-            foreach (var line in lines)
+        public static void LoadProducts()
+        {
+            if (HasProductsLoaded) // TODO: implementera ReloadProducts?
+                throw new InvalidOperationException("Products have already been loaded.");
+
+            string[] lines;
+            try
             {
-                string[] commaSeparatedValues = line.Split('#');
+                lines = File.ReadAllLines(PathToProducts);
+            }
+            catch (FileNotFoundException)
+            {
+                throw new FileNotFoundException($"Kunde inte hitta produktfilen: \"{PathToProducts}\"");
+            }
+            for (int iRow = 0; iRow < lines.Length; ++iRow)
+            {
+                string[] columns = lines[iRow].Split('#');
                 try
                 {
                     // Kasta undantag vid eventuell formateringsfel.
-                    int serialNumber = int.Parse(commaSeparatedValues[0]);
-                    string name = commaSeparatedValues[1];
-                    decimal price = decimal.Parse(commaSeparatedValues[2]);
-                    string category = commaSeparatedValues[3];
-                    string description = commaSeparatedValues[4];
-                    // Ingen ny produkt läggs till om ett undantag kastas.
-                    products.Add(Product.RegisterNew(serialNumber, name, price, category, description));
+                    int serialNumber = int.Parse(columns[0]);
+                    string name = columns[1];
+                    decimal price = decimal.Parse(columns[2]);
+                    string category = columns[3];
+                    string description = columns[4];
+                    // Ingen ny produkt läggs till om ett undantag kastas ovan.
+                    Product.RegisterNew(serialNumber, name, price, category, description);
                 }
                 catch (FormatException)
                 {
                     // Meddelande: "Textrad lästes inte in korrekt."
-                    string errorMessage = $"Rad \"{line}\" lästes inte in korrekt. Var god kontrollera källan.";
-                    Console.WriteLine(errorMessage);
+                    string errorMessage =
+                        $"Rad #{iRow + 1} lästes inte in korrekt. Var god kontrollera källan.";
+                    Console.Error.WriteLine(errorMessage);
+                }
+                catch (Product.DuplicateException e)
+                {
+                    string errorMessage =
+                        $"Produkten på rad #{iRow + 1} kunde inte registreras i systemet:\n{e}";
+                    Console.Error.WriteLine(errorMessage);
                 }
                 catch (Exception e)
                 {
                     // Om undantag kastas av oförväntad anledning.
                     // Meddelande: "Kunde inte läsa in textrad."
-                    string errorMessage = $"Fångade oväntat fel på rad \"{line}\". Fördjupad felinformation:\n{e}";
-                    Console.WriteLine(errorMessage);
+                    string errorMessage =
+                        $"Fångade oväntat fel på rad #{iRow + 1}. Fördjupad felinformation:\n{e}";
+                    Console.Error.WriteLine(errorMessage);
                 }
             }
-
-            return products;
+            HasProductsLoaded = true;
         }
-
-        // Kanske inte behövs?
-        private static Image ReadImageFromFile() => throw new NotImplementedException();
 
         // Metoder som kan användas till att skapa ett kvitto och spara som en fil på datorn.
         public static void CreateReceipt(ShoppingCart cart)
@@ -115,11 +125,11 @@ namespace WFShop
             List<ProductEntry> productEntries = new List<ProductEntry>();
             foreach (string line in lines)
             {
-                string[] commaSeparatedValues = line.Split('#');
+                string[] separatedValues = line.Split('#');
                 try
                 {
-                    int serialNumber = int.Parse(commaSeparatedValues[0]);
-                    int amount = int.Parse(commaSeparatedValues[1]);
+                    int serialNumber = int.Parse(separatedValues[0]);
+                    int amount = int.Parse(separatedValues[1]);
                     // GetProduct kan kasta ArgumentNullException om serienummret inte matchar någon produkt.
                     productEntries.Add(new ProductEntry(GetProduct(serialNumber), amount));
                 }
@@ -130,7 +140,7 @@ namespace WFShop
                 }
                 catch (ArgumentNullException)
                 {
-                    string errorMessage = $"Serienummret '{commaSeparatedValues[0]}' refererar inte till någon produkt.";
+                    string errorMessage = $"Serienummret '{separatedValues[0]}' refererar inte till någon produkt.";
                     Console.WriteLine(errorMessage);
                 }
                 catch (Exception e)
@@ -144,6 +154,11 @@ namespace WFShop
         }
 
         // Omvandlar int till Product.
-        private static Product GetProduct(int serialNumber) => GetProducts().Find(x => x.SerialNumber == serialNumber);
+        private static Product GetProduct(int serialNumber)
+        {
+            if (!HasProductsLoaded)
+                LoadProducts();
+            return Product.TryGet(serialNumber, out Product p) ? p : null;
+        }
     }
 }
