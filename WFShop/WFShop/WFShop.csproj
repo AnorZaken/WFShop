@@ -58,6 +58,7 @@
     <Compile Include="DiscountEntry.cs" />
     <Compile Include="Discounts\BuyXPayForY.cs" />
     <Compile Include="Discounts\TotalPercentageCoupon.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="FileHandler.cs" />
     <Compile Include="GUI.cs" />
     <Compile Include="IDiscount.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="ProductEntry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RangeOption.cs" />
     <Compile Include="ShoppingCart.cs" />
   </ItemGroup>
   <ItemGroup>
