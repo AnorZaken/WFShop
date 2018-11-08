@@ -53,7 +53,6 @@ namespace WFShop
                 if (!FileHandler.HasProductsLoaded)
                     FileHandler.LoadProducts();
                 products = Product.AllProducts;
-                // TODO: Logiskt fel uppstår på raden nedan. Programmet hittar och läser filer, men produkterna som returneras är null.
                 cart = FileHandler.GetShoppingCart();
             }
             catch (FileNotFoundException e)
@@ -63,7 +62,14 @@ namespace WFShop
             }
 
             Text = "<App Name>";
-            Size = new Size(1000, 500);
+            Size = new Size(1570, 890);
+            MinimumSize = new Size(1570, 890);
+
+            SizeChanged += (s, e) =>
+            {
+                foreach (var cib in cartItemBoxView.Controls)
+                    (cib as CartItemBox).Width = (cib as CartItemBox).Parent.Width;
+            };
 
             Initialize();
         }
@@ -73,12 +79,22 @@ namespace WFShop
         {
             splitContainer = new SplitContainer
             {
-                BorderStyle = BorderStyle.FixedSingle,
+                //BorderStyle = BorderStyle.FixedSingle,
                 Dock = DockStyle.Fill
             };
             Controls.Add(splitContainer);
             // En tredjedel av fönstret.
             splitContainer.SplitterDistance = (int)(Width / 1.5);
+            splitContainer.SplitterMoved += (s, e) =>
+            {
+                if (splitContainer.SplitterDistance > (int)(Width / 1.5))
+                    splitContainer.SplitterDistance = (int)(Width / 1.5);
+            };
+            splitContainer.SplitterMoving += (s, e) =>
+            {
+                if (splitContainer.SplitterDistance > (int)(Width / 1.5))
+                    splitContainer.SplitterDistance = (int)(Width / 1.5);
+            };
 
             CreatePanel1Controls();
             CreatePanel2Controls();
@@ -98,7 +114,6 @@ namespace WFShop
             TableLayoutPanel mainTable = new TableLayoutPanel
             {
                 RowCount = 2,
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single,
                 Dock = DockStyle.Fill
             };
             splitContainer.Panel1.Controls.Add(mainTable);
@@ -159,7 +174,6 @@ namespace WFShop
             TableLayoutPanel mainTable = new TableLayoutPanel
             {
                 RowCount = 2,
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single,
                 Dock = DockStyle.Fill
             };
             splitContainer.Panel2.Controls.Add(mainTable);
@@ -170,7 +184,6 @@ namespace WFShop
             {
                 ColumnCount = 2,
                 RowCount = 3,
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single,
                 Dock = DockStyle.Fill
             };
             mainTable.Controls.Add(cartViewTable);
@@ -222,7 +235,6 @@ namespace WFShop
             TableLayoutPanel buttonTable = new TableLayoutPanel
             {
                 ColumnCount = 2,
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single,
                 Dock = DockStyle.Fill
             };
             mainTable.Controls.Add(buttonTable);
@@ -264,13 +276,15 @@ namespace WFShop
 
         private void CreateProductBoxes(IReadOnlyCollection<Product> products, string filter = "Alla", string sortBy = null)
         {
+            flowProductBoxView.Controls.Clear();
+
             //Skapa ProductBox för varje produkt som finns i textfilen.
-            
+
             // IEnumerable som innehåller filtrerad version av product-listan.
             IEnumerable<Product> filteredProducts = 
-                filter == "Alla" || filter is null 
-                ? products.Select(p => p) 
-                : products.Where(p => p.Category.Name == filter);
+                filter == "Alla" || filter is null ?
+                products.Select(p => p) :
+                products.Where(p => p.Category.Name == filter);
 
             // IEnumerable som innehåller en sorterad version av product-listan.
             IEnumerable<Product> orderedProducts = 
@@ -310,7 +324,6 @@ namespace WFShop
 
         private void RefreshProductBoxView()
         {
-            flowProductBoxView.Controls.Clear();
             CreateProductBoxes(products, filterComboBox.SelectedItem as string, sortByNameRadioButton.Checked ? "Name" : sortByPriceRadioButton.Checked ? "Price" : "");
         }
 
@@ -342,7 +355,14 @@ namespace WFShop
 
         private void OnThumbnailClick_ProductBox(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            Form enlargePhoto = new Form() { Size = new Size(750, 750) };
+            enlargePhoto.Controls.Add(new PictureBox
+            {
+                Image = (sender as PictureBox).Image,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Dock = DockStyle.Fill
+            });
+            enlargePhoto.Show();
         }
 
         // CartItemBox
@@ -361,6 +381,7 @@ namespace WFShop
             }
             else if (button.Name == "QuantitySubtractButton")
             {
+                // TODO: OBS! OBS! OBS! Quantity i CartItemBox blir nu större än 0, men det kan fortfarande finnas 0 st av en vara.
                 cart.Remove(pe.Product, 1);
                 totalCostLabel.Text = $"{cart.FinalPrice} kr";
                 var c = GetCartItemBox();
@@ -384,7 +405,14 @@ namespace WFShop
 
         private void OnThumbnailClick_CartItemBox(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            Form enlargePhoto = new Form() { Size = new Size(750, 750) };
+            enlargePhoto.Controls.Add(new PictureBox
+            {
+                Image = (sender as PictureBox).Image,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Dock = DockStyle.Fill
+            });
+            enlargePhoto.Show();
         }
     }
 }

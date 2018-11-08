@@ -30,7 +30,7 @@ namespace WFShop
         private int Quantity
         {
             get => quantity;
-            set => quantity = value < 0 ? 0 : value;
+            set => quantity = value < 1 ? 1 : value;
         }
 
         public Color AccentColor
@@ -103,11 +103,9 @@ namespace WFShop
                 Text = ProductEntry.Product.Name,
                 Font = new Font(SetControlFont(), 8, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft,
-                Dock = DockStyle.Fill,
-                Cursor = Cursors.Hand
+                Dock = DockStyle.Fill
             };
             table.Controls.Add(productNameLabel, 1, 0);
-            productNameLabel.Click += OnProductNameLabelClick;
 
             // Pris-etiketten
             table.Controls.Add(new Label
@@ -177,7 +175,7 @@ namespace WFShop
                 table.RowCount = 2;
                 //table.Height *= 2;
                 Height *= 2;
-                discount = new Label() { Text = discountEntry.ToString(), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleRight };
+                discount = new Label() { Text = discountEntry.ToString(), Font = new Font("Arial", 8), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleRight };
                 table.SetColumnSpan(discount, 6);
                 table.Controls.Add(discount, 0, 1);
             }
@@ -280,10 +278,5 @@ namespace WFShop
         public decimal GetTotalCost() => ProductEntry.Product.Price * Quantity;
 
         public override string ToString() => $"CartItemBox describing: {ProductEntry.Product}";
-
-        private void OnProductNameLabelClick(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
