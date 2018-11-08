@@ -18,6 +18,9 @@ namespace WFShop
         private FlowLayoutPanel cartItemBoxView;
         private TextBox couponCodeTextBox;
         private Label totalCostLabel;
+        private ComboBox filterComboBox;
+        private RadioButton sortByNameRadioButton;
+        private RadioButton sortByPriceRadioButton;
 
         // Fields
         private IReadOnlyCollection<Product> products;
@@ -50,6 +53,7 @@ namespace WFShop
                 if (!FileHandler.HasProductsLoaded)
                     FileHandler.LoadProducts();
                 products = Product.AllProducts;
+                // TODO: Logiskt fel uppstår på raden nedan. Programmet hittar och läser filer, men produkterna som returneras är null.
                 cart = FileHandler.GetShoppingCart();
             }
             catch (FileNotFoundException e)
@@ -100,19 +104,21 @@ namespace WFShop
             splitContainer.Panel1.Controls.Add(mainTable);
             mainTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
-            Panel sortPanel = new Panel
+            Panel filterPanel = new Panel
             {
                 Margin = new Padding(0),
                 Dock = DockStyle.Fill
             };
-            mainTable.Controls.Add(sortPanel);
+            mainTable.Controls.Add(filterPanel);
 
-            TableLayoutPanel sortTable = new TableLayoutPanel { ColumnCount = 2, Dock = DockStyle.Fill };
-            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            sortTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            TableLayoutPanel filterTable = new TableLayoutPanel { ColumnCount = 4, Dock = DockStyle.Fill };
+            filterTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            filterTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            filterTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+            filterTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
 
-            sortPanel.Controls.Add(sortTable);
-            sortTable.Controls.Add(new Label
+            filterPanel.Controls.Add(filterTable);
+            filterTable.Controls.Add(new Label
             {
                 Text = "Sortera efter: ",
                 Font = new Font("Arial", 12, FontStyle.Bold),
@@ -120,12 +126,16 @@ namespace WFShop
                 Dock = DockStyle.Fill
             });
 
-            ComboBox sortComboBox = new ComboBox { Font = new Font("Arial", 12), Dock = DockStyle.Fill };
-            sortTable.Controls.Add(sortComboBox);
-            sortComboBox.Items.Add("Namn");
-            sortComboBox.Items.Add("Pris");
-            sortComboBox.SelectedIndexChanged += OnSortComboBoxIndexChanged;
-            // TODO: Läs in kategorier från textfil eller från List.            
+            sortByNameRadioButton = new RadioButton { Text = "Namn", Font = new Font("Arial", 12), Name = nameof(sortByNameRadioButton) };
+            filterTable.Controls.Add(sortByNameRadioButton);
+            sortByNameRadioButton.CheckedChanged += (s, e) => RefreshProductBoxView();
+
+            sortByPriceRadioButton = new RadioButton { Text = "Pris", Font = new Font("Arial", 12), Name = nameof(sortByPriceRadioButton) };
+            filterTable.Controls.Add(sortByPriceRadioButton);
+            sortByPriceRadioButton.CheckedChanged += (s, e) => RefreshProductBoxView();
+
+            filterComboBox = new ComboBox { Font = new Font("Arial", 12), Sorted = true, Dock = DockStyle.Fill };
+            filterTable.Controls.Add(filterComboBox);
 
             flowProductBoxView = new FlowLayoutPanel
             {
@@ -133,7 +143,15 @@ namespace WFShop
                 Dock = DockStyle.Fill
             };
             mainTable.Controls.Add(flowProductBoxView);
+            
+            // Returnera en IEnumerable med unika kategorier.
+            IEnumerable<string> categories = products.Select(p => p.Category.Name).Distinct();
+            filterComboBox.Items.Add("Alla");
+            filterComboBox.Items.AddRange(categories.ToArray());
+            filterComboBox.SelectedIndexChanged += (s, e) => RefreshProductBoxView();
+            // TODO: Läs in kategorier från textfil eller från List.            
         }
+
 
         private void CreatePanel2Controls()
         {
@@ -243,10 +261,24 @@ namespace WFShop
             RefreshCartItemBoxView();
         }
 
-        private void CreateProductBoxes(IReadOnlyCollection<Product> products)
+        private void CreateProductBoxes(IReadOnlyCollection<Product> products, string filter = "Alla", string sortBy = null)
         {
             //Skapa ProductBox för varje produkt som finns i textfilen.
-            foreach (Product product in products)
+            // Rensa flowProductBoxView när metoden anropas.
+            //flowProductBoxView.Controls.Clear();
+            // IEnumerable som innehåller filtrerad version av product-listan.
+            IEnumerable<Product> filteredProducts = 
+                filter == "Alla" || filter is null 
+                ? products.Select(p => p) 
+                : products.Where(p => p.Category.Name == filter);
+
+            IEnumerable<Product> orderedProducts = 
+                sortBy is "Name" ? filteredProducts.OrderBy(p => p.Name) : 
+                sortBy is "Price" ? filteredProducts.OrderBy(p => p.Price) : 
+                filteredProducts;
+           
+
+            foreach (Product product in orderedProducts)
             {
                 ProductBox p = new ProductBox(product, 200, 250);
                 flowProductBoxView.Controls.Add(p);
@@ -276,6 +308,12 @@ namespace WFShop
             }
         }
 
+        private void RefreshProductBoxView()
+        {
+            flowProductBoxView.Controls.Clear();
+            CreateProductBoxes(products, filterComboBox.SelectedItem as string, sortByNameRadioButton.Checked ? "Name" : sortByPriceRadioButton.Checked ? "Price" : "");
+        }
+
         // this
         private void OnCouponCodeTextBoxChanged(object sender, EventArgs e)
         {
@@ -286,12 +324,6 @@ namespace WFShop
                 textBox.BackColor = Color.Green;
             else
                 textBox.BackColor = Color.Red;
-        }
-
-        private void OnSortComboBoxIndexChanged(object sender, EventArgs e)
-        {
-            ComboBox comboBox = (ComboBox)sender;
-            int index = comboBox.SelectedIndex;
         }
 
         // ProductBox
@@ -353,6 +385,11 @@ namespace WFShop
         private void OnThumbnailClick_CartItemBox(object sender, EventArgs e)
         {
             throw new NotImplementedException();
+        }
+
+        enum SortBy
+        {
+            Name, Price, Unspecified
         }
     }
 }
