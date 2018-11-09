@@ -19,9 +19,10 @@ namespace WFShop
         private string controlFont;
 
         // Control properties.
-        public Product Product { get; }
 
         // Properties
+        public Product Product { get; }
+
         public Color AccentColor
         {
             private get => accentColor;
@@ -58,7 +59,6 @@ namespace WFShop
             {
                 ColumnCount = 2,
                 Dock = DockStyle.Fill,
-                //CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
             panel.Controls.Add(table);
             // Hälften av kontrollen höjd tas upp av produktbilden.

@@ -27,6 +27,7 @@ namespace WFShop
 
         // Properties
         public ProductEntry ProductEntry { get; set; }
+
         private int Quantity
         {
             get => quantity;
@@ -52,6 +53,11 @@ namespace WFShop
                 ReloadControl();
             }
         }
+
+        public bool HasDiscountInfo
+            => table.RowCount == 2;
+
+        private Control discount = null;
 
         public CartItemBox(ProductEntry productEntry, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
         {
@@ -144,11 +150,6 @@ namespace WFShop
             table.Controls.Add(RemoveButton, 5, 0);
             RemoveButton.Click += (s, e) => Parent.Controls.Remove(this);
         }
-
-        public bool HasDiscountInfo
-            => table.RowCount == 2;
-
-        private Control discount = null;
 
         public void RemoveDiscontInfo()
         {

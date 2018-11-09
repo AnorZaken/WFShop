@@ -325,10 +325,8 @@ namespace WFShop
             }
         }
 
-        private void RefreshProductBoxView()
-        {
+        private void RefreshProductBoxView() =>
             CreateProductBoxes(products, filterComboBox.SelectedItem as string, sortByNameRadioButton.Checked ? "Name" : sortByPriceRadioButton.Checked ? "Price" : "");
-        }
 
         // this
         private void OnCouponCodeTextBoxChanged(object sender, EventArgs e)
