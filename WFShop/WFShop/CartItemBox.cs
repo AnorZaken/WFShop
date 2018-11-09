@@ -142,6 +142,7 @@ namespace WFShop
                 Name = nameof(RemoveButton)
             };
             table.Controls.Add(RemoveButton, 5, 0);
+            RemoveButton.Click += (s, e) => Parent.Controls.Remove(this);
         }
 
         public bool HasDiscountInfo
@@ -220,7 +221,10 @@ namespace WFShop
             table.Controls.Add(QuantitySubtractButton);
             QuantitySubtractButton.Click += (s, e) =>
             {
-                // Ändrar inte antalet produkter.
+                // Ta bort sig själv om villkoret uppfylls.
+                if (Quantity <= 1)
+                    Parent.Controls.Remove(this);
+                // Obs! Ändrar inte på antalet produkter utan bara värdet på den lokala variabeln quantity.
                 Quantity--;
                 quantityLabel.Text = Quantity.ToString();
                 totalPriceLabel.Text = $"{GetTotalCost()} kr";
@@ -254,7 +258,7 @@ namespace WFShop
             table.Controls.Add(QuantityAddButton);
             QuantityAddButton.Click += (s, e) =>
             {
-                // Ändrar inte antalet produkter.
+                // Obs! Ändrar inte på antalet produkter utan bara värdet på den lokala variabeln quantity.
                 Quantity++;
                 quantityLabel.Text = Quantity.ToString();
                 totalPriceLabel.Text = $"{GetTotalCost()} kr";

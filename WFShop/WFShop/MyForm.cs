@@ -237,7 +237,11 @@ namespace WFShop
                 Dock = DockStyle.Fill
             };
             buttonTable.Controls.Add(saveCartButton);
-            saveCartButton.Click += (s, e) => FileHandler.SaveShoppingCart(cart);
+            saveCartButton.Click += (s, e) =>
+            {
+                FileHandler.SaveShoppingCart(cart);
+                MessageBox.Show("Din varukorg sparades.");
+            };
 
             Button checkoutButton = new Button
             {
@@ -252,9 +256,14 @@ namespace WFShop
             buttonTable.Controls.Add(checkoutButton);
             checkoutButton.Click += (s, e) =>
             {
-                FileHandler.SaveReceipt(cart);
-                MessageBox.Show("Kvittot har sparats till:\n" + $"\"{FileHandler.PathToReceipt}\"");
-                ClearCart();
+                if (cart.ArticleCount > 0)
+                {
+                    FileHandler.SaveReceipt(cart);
+                    MessageBox.Show("Kvittot har sparats till:\n" + $"\"{FileHandler.PathToReceipt}\"");
+                    ClearCart();
+                }
+                else
+                    MessageBox.Show("Din varukorg är tom.");
             };
 
             // Ladda om cartItemBoxView så att eventuella produkter i textfilen visas.
@@ -284,7 +293,7 @@ namespace WFShop
             IEnumerable<Product> orderedProducts = 
                 sortBy is "Name" ? filteredProducts.OrderBy(p => p.Name) : 
                 sortBy is "Price" ? filteredProducts.OrderBy(p => p.Price) : 
-                filteredProducts;           
+                filteredProducts;
 
             foreach (Product product in orderedProducts)
             {
@@ -384,8 +393,7 @@ namespace WFShop
             }
             else if (button.Name == "QuantitySubtractButton")
             {
-                // TODO: OBS! OBS! OBS! Quantity i CartItemBox blir nu större än 0, men det kan fortfarande finnas 0 st av en vara.
-                cart.Remove(pe.Product, 1);
+                cart.Remove(pe.Product);
                 RefreshTotalCost();
                 var c = GetCartItemBox();
                 if (c.HasDiscountInfo)
@@ -398,7 +406,6 @@ namespace WFShop
             {
                 cart.RemoveAll(pe.Product);
                 RefreshTotalCost();
-                RefreshCartItemBoxView();
             }
 
             // lokal metod för att undvika kod-duplicering:
