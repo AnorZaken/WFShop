@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace WFShop.Discounts
 {
-    class TotalPercentageCoupon : Discount
+    sealed class TotalPercentageCoupon : Discount
     {
         const string TYPE = @"T%C";
 
@@ -18,19 +18,28 @@ namespace WFShop.Discounts
             this.MinCartValue = minimumCartValue;
         }
 
+        // Percentage off ]0.00 - 1.00[.
         public readonly decimal Percentage;
+
+        // Minimum required cart value for coupon to be applicable.
         public readonly decimal MinCartValue;
 
         private decimal Sum(IReadOnlyDictionary<Product, int> cart)
             => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
 
-        public override decimal Calculate(IReadOnlyDictionary<Product, int> cart)
+        protected sealed override decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart)
         {
             var sum = Sum(cart);
             return sum >= MinCartValue ? sum * Percentage : 0;
         }
 
-        public override bool IsApplicable(IReadOnlyDictionary<Product, int> cart)
+        protected sealed override decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate)
+        {
+            var sum = Sum(cart) - totalAppliedRebate;
+            return sum >= MinCartValue ? sum * Percentage : 0;
+        }
+
+        public sealed override bool IsApplicable(IReadOnlyDictionary<Product, int> cart)
             => Sum(cart) >= MinCartValue;
 
         #region --- Parsing (static) ---
@@ -51,7 +60,7 @@ namespace WFShop.Discounts
 
             public TotalPercentageCoupon ParseOrNull(IDictionary<string, string> parsedValues)
             {
-                var style = NumberStyles.Integer;
+                var style = NumberStyles.AllowDecimalPoint | NumberStyles.AllowTrailingWhite;
                 var culture = CultureInfo.InvariantCulture;
                 if (parsedValues.Count == keys.Length &&
                     parsedValues.TryGetValue(keys[0], out string type) &&
@@ -67,11 +76,11 @@ namespace WFShop.Discounts
                     couponCode = couponCode?.Trim();
                     if (!(couponCode?.Length >= 3))
                         throw new FormatException("Coupon codes must be at least 3 characters long (ignoring leading / trailing whitespace)");
-                    if (percentage <= 0 || percentage >= 1)
-                        throw new FormatException("Percentage must be greater than 0.0 and less than 1.0.");
+                    if (percentage <= 0 || percentage >= 100)
+                        throw new FormatException("Percentage must be greater than 0.0 and less than 100.0.");
                     if (minValue < 0)
                         throw new FormatException("MinCartValue cannot be negative.");
-                    return new TotalPercentageCoupon(name, desc, couponCode, percentage, minValue);
+                    return new TotalPercentageCoupon(name, desc, couponCode, percentage / 100, minValue);
                 }
                 return null;
             }

@@ -29,5 +29,8 @@ namespace WFShop
 
         // Calculate how large of a discount this applies to a cart with the specified products (and amounts).
         decimal Calculate(IReadOnlyDictionary<Product, int> cart);
+
+        // (Used by couponCodes.)
+        decimal Calculate(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate);
     }
 }

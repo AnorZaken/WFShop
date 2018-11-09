@@ -30,7 +30,18 @@ namespace WFShop
         protected bool IsRegistered { get; }
 
         public abstract bool IsApplicable(IReadOnlyDictionary<Product, int> cart);
-        public abstract decimal Calculate(IReadOnlyDictionary<Product, int> cart);
+
+        public decimal Calculate(IReadOnlyDictionary<Product, int> cart)
+            => Math.Round(CalculateImpl(cart), 2, MidpointRounding.AwayFromZero);
+
+        public decimal Calculate(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate)
+            => Math.Round(CalculateImpl(cart, totalAppliedRebate), 2, MidpointRounding.AwayFromZero);
+
+        protected abstract decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart);
+        protected virtual decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate)
+            => CalculateImpl(cart);
+
+        public override string ToString() => Name;
 
         #region --- All Discounts (static) ---
         /* Alla discounts ligger efter konstruktion statiskt tillgängliga i Discount klassen:

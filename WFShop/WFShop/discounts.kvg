@@ -1,0 +1,13 @@
+﻿Type: BXP4Y
+Name: "3 för 2 Apelsiner!"
+Desc: ""
+ProductSN: 273984130
+BuyX: 3
+PayY: 2
+
+Type: T%C
+Name: 10% Rabatt!
+Desc: Ger 10% rabatt på hela ditt köp!
+CouponCode: GiveMe10
+Percentage: 10.0
+MinCartValue: 1

@@ -32,52 +32,35 @@ namespace WFShop
 
         public MyForm()
         {
-            FileHandler.PathToProducts = "productSortiment.csv";
-            FileHandler.PathToCart = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\Temp\cart.csv";
-            FileHandler.PathToReceipt = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\receipt.txt";
-            ImageHandler.PathToFolder = Environment.CurrentDirectory + @"\Images";
-
-            if (!File.Exists(FileHandler.PathToCart))
-            {
-                using (StreamWriter streamWriter = new StreamWriter(FileHandler.PathToCart))
-                {
-                    streamWriter.Write(string.Empty);
-                    streamWriter.Close(); // <- Lyckas inte stänga med File-klassen.
-                }
-                MessageBox.Show($"Skapade filen {FileHandler.PathToCart}.");
-                
-            }
-            cart = new ShoppingCart();
-            try
-            {
-                if (!FileHandler.HasProductsLoaded)
-                    FileHandler.LoadProducts();
-                products = Product.AllProducts;
-                // TODO: Logiskt fel uppstår på raden nedan. Programmet hittar och läser filer, men produkterna som returneras är null.
-                cart = FileHandler.LoadShoppingCart();
-            }
-            catch (FileNotFoundException e)
-            {
-                MessageBox.Show(e.Message);
-                Environment.Exit(0);
-            }
-
-            Text = "<App Name>";
+            Text = "<App Name>"; // TODO: läs från config
             Size = new Size(1570, 890);
             MinimumSize = new Size(1570, 890);
+            products = Product.AllProducts;
+            cart = LoadOrCreateCart();
 
+            Initialize();
+        }
+
+        private static ShoppingCart LoadOrCreateCart()
+        {
+            if (!FileHandler.TryLoadShoppingCart(out ShoppingCart cart, out int errorCount))
+                return new ShoppingCart();
+            else if (errorCount != 0)
+                MessageBox.Show("Fel uppstod då den sparade varukorgen laddades."
+                    + "\nVar god kontrollera varukorgens innehåll."
+                    + "\n(Mer info finns i programmets error-ström.)");
+            return cart;
+        }
+
+        // Rita upp GUI:t.
+        private void Initialize()
+        {
             SizeChanged += (s, e) =>
             {
                 foreach (var cib in cartItemBoxView.Controls)
                     (cib as CartItemBox).Width = (cib as CartItemBox).Parent.Width;
             };
 
-            Initialize();
-        }
-
-        // Rita upp GUI:t.
-        private void Initialize()
-        {
             splitContainer = new SplitContainer
             {
                 //BorderStyle = BorderStyle.FixedSingle,
@@ -211,7 +194,8 @@ namespace WFShop
             couponCodeTextBox = new TextBox
             {
                 Font = new Font("Arial", 12),
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                BackColor = Color.White,
             };
             cartViewTable.Controls.Add(couponCodeTextBox);
             couponCodeTextBox.TextChanged += OnCouponCodeTextBoxChanged;
@@ -342,11 +326,17 @@ namespace WFShop
         {
             TextBox textBox = (TextBox)sender;
 
-            // Test.
-            if (textBox.Text == "abc123")
+            // We only allow a single coupon (for now anyway)
+            cart.ClearCoupons();
+
+            if (cart.AddCoupon(textBox.Text))
                 textBox.BackColor = Color.Green;
-            else
+            else if (textBox.Text.Length > 0)
                 textBox.BackColor = Color.Red;
+            else
+                textBox.BackColor = Color.White;
+
+            RefreshTotalCost();
         }
 
         // ProductBox

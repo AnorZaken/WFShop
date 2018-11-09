@@ -22,11 +22,11 @@ namespace WFShop
         public int UniqueProductCount => cart.Count;
 
         // dessa variabler är cachade / lazy, och uppdateras vid behov!
-        private bool isDirtyArticles = true;
-        private bool isDirtyDiscounts = true;
-        private decimal p_articleValue, p_discountValue;
+        private bool isDirtyArticles = true; //TODO: dessa behöver splittas!
+        private bool isDirtyDiscounts = true; //TODO: dessa sätts aldrig false!
+        private decimal p_articleValue, p_discountValue, p_rebateValue;
         private int p_articleCount;
-        private IReadOnlyCollection<Discount> p_appliedRebates = Array.Empty<Discount>();
+        private IReadOnlyCollection<DiscountEntry> p_appliedRebates = Array.Empty<DiscountEntry>();
 
         // Antalet varor, dvs har man 4st äpplen och 6st ägg så är antalet varor 10.
         public int ArticleCount
@@ -40,6 +40,11 @@ namespace WFShop
             ? p_articleValue = CalculateArticleValue()
             : p_articleValue;
 
+        public decimal RebateValue
+            => isDirtyArticles | isDirtyDiscounts
+            ? p_rebateValue = CalculateRebatesValue()
+            : p_rebateValue;
+
         // Totala rabatten på varorna i kundvagnen.
         public decimal DiscountValue
             => isDirtyArticles | isDirtyDiscounts
@@ -47,7 +52,8 @@ namespace WFShop
             : p_discountValue;
 
         // Totala kostnaden för varorna i kundvagnen, inklusive rabatter.
-        public decimal FinalPrice => ArticleValue - DiscountValue;
+        public decimal FinalPrice
+            => Math.Round(ArticleValue - DiscountValue, 2, MidpointRounding.AwayFromZero);
 
         protected decimal CalculateArticleValue()
             => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
@@ -55,8 +61,11 @@ namespace WFShop
         protected IEnumerable<Discount> FindApplicableRebates()
             => Discount.AllRebates.Where(d => d.IsApplicable(cart));
 
+        protected decimal CalculateRebatesValue()
+            => AppliedRebates.Sum(de => de.Amount);
+
         protected decimal CalculateDiscountValue()
-            => AppliedRebates.Sum(d => d.Calculate(cart)) + appliedCoupons.Sum(d => d.Calculate(cart));
+            => RebateValue + appliedCoupons.Sum(d => d.Calculate(cart, RebateValue));
 
         public bool AddCoupon(Discount coupon)
         {
@@ -77,6 +86,15 @@ namespace WFShop
             bool b = appliedCoupons.Remove(coupon);
             isDirtyDiscounts |= b;
             return b;
+        }
+
+        public void ClearCoupons()
+        {
+            if (appliedCoupons.Count != 0)
+            {
+                appliedCoupons.Clear();
+                isDirtyDiscounts = true;
+            }
         }
 
         public bool AddCoupon(string couponCode)
@@ -136,23 +154,22 @@ namespace WFShop
         public IReadOnlyDictionary<Product, int> ProductsDict
             => cart; // <-- dålig kodstil. TODO!
 
-        public IReadOnlyCollection<IDiscount> AppliedCoupons
-            => appliedCoupons.ToArray();
+        public IReadOnlyCollection<DiscountEntry> AppliedCoupons
+            => appliedCoupons.Select(c => new DiscountEntry(c, c.Calculate(cart, RebateValue))).ToArray();
 
-        public IReadOnlyCollection<IDiscount> AppliedRebates
+        public IReadOnlyCollection<DiscountEntry> AppliedRebates
             => isDirtyArticles
-            ? p_appliedRebates = FindApplicableRebates().ToArray()
+            ? p_appliedRebates = FindApplicableRebates().Select(r => new DiscountEntry(r, r.Calculate(cart))).ToArray()
             : p_appliedRebates;
 
         public bool HasRebate(int productSerialNumber) // TODO - fixa bättre!
-            => AppliedRebates.Any(d => d.ProductSerialNumber == productSerialNumber);
+            => AppliedRebates.Any(d => d.Discount.ProductSerialNumber == productSerialNumber);
 
         public bool TryGetRebate(int productSerialNumber, out DiscountEntry discountEntry)
         {
             // TODO - fixa bättre!
-            var r = AppliedRebates.FirstOrDefault(d => d.ProductSerialNumber == productSerialNumber);
-            discountEntry = r == null ? default : new DiscountEntry(r, r.Calculate(cart));
-            return r != null;
+            discountEntry = AppliedRebates.FirstOrDefault(d => d.Discount.ProductSerialNumber == productSerialNumber);
+            return discountEntry.Discount != null;
         }
 
         IEnumerator<ProductEntry> IEnumerable<ProductEntry>.GetEnumerator()

@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace WFShop.Discounts
 {
-    class BuyXPayForY : Discount
+    sealed class BuyXPayForY : Discount
     {
         const string TYPE = "BXP4Y";
 
@@ -18,7 +18,7 @@ namespace WFShop.Discounts
         public readonly int BuyX;
         public readonly int PayY;
 
-        public override decimal Calculate(IReadOnlyDictionary<Product, int> cart)
+        protected sealed override decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart)
         {
             if (Product.TryGet(ProductSerialNumber, out Product p) &&
                 cart.TryGetValue(p, out int cartAmount))
@@ -30,7 +30,7 @@ namespace WFShop.Discounts
             return 0;
         }
 
-        public override bool IsApplicable(IReadOnlyDictionary<Product, int> cart)
+        public sealed override bool IsApplicable(IReadOnlyDictionary<Product, int> cart)
             => Product.TryGet(ProductSerialNumber, out Product p)
             && cart.TryGetValue(p, out int amount)
             && amount >= BuyX;

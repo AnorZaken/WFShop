@@ -9,12 +9,14 @@ using System.Globalization;
 
 namespace WFShop
 {
-    abstract class FileHandler
+    abstract class FileHandler // TODO: denna klassen har för mycket coupling...
     {
         public static string PathToProducts { get; set; }
         public static string PathToCart { get; set; }
         public static string PathToReceipt { get; set; }
+        public static string PathToDiscounts { get; set; }
         public static bool HasProductsLoaded { get; private set; }
+        public static bool HasDiscountsLoaded { get; private set; }
 
         public static void LoadProducts()
         {
@@ -67,63 +69,96 @@ namespace WFShop
             HasProductsLoaded = true;
         }
 
-        //private static IEnumerable<string> CreateReceipt(ShoppingCart cart)
-        //{
-        //    var lines = new List<string>(2 + 3 * cart.UniqueProductCount + 1);
-        //    lines.Add("Kvitto");
-        //    lines.Add("");
-        //    //List<string> lines = new List<string> { "Kvitto", "" };
-        //    foreach (ProductEntry productEntry in cart)
-        //    {
-        //        lines.Add($"{productEntry.Product.SerialNumber}: {productEntry.Amount} x {productEntry.Product.Name} à {productEntry.Product.Price} kr");
-        //        lines.Add($"{productEntry.Product.Price * productEntry.Amount} kr");
-        //        lines.Add("");
-        //    }
-        //    lines.Add($"Totalt: {cart.FinalPrice} kr");
-        //    return lines;
-        //}
-        private static IEnumerable<string> CreateReceipt(ShoppingCart cart)
+        public static void LoadDiscounts()
+        {
+            if (HasDiscountsLoaded) // TODO: implementera ReloadDiscounts?
+                throw new InvalidOperationException("Discounts have already been loaded.");
+
+            foreach(var dict in ParseKeyGroups(PathToDiscounts))
+            {
+                if (!Discount.TryParse(dict, out _))
+                {
+                    Console.Error.WriteLine("No registered discount parser was able to parse discount data:");
+                    foreach (var kvp in dict)
+                    {
+                        Console.Error.Write(kvp.Key + ": ");
+                        Console.Error.WriteLine(kvp.Value);
+                    }
+                }
+            }
+            HasDiscountsLoaded = true;
+        }
+        
+        private static IEnumerable<string> CreateReceipt(ShoppingCart cart, string currency = "kr")
         {
             yield return "Kvitto";
             yield return "";
-            foreach (ProductEntry productEntry in cart)
+            decimal sumDiscount = 0;
+            foreach (ProductEntry pe in cart)
             {
-                yield return $"{productEntry.Product.SerialNumber}: {productEntry.Amount} x {productEntry.Product.Name} à {productEntry.Product.Price} kr";
-                yield return $"{productEntry.Product.Price * productEntry.Amount} kr";
+                yield return $"({pe.SerialNumber})";
+                yield return $"{pe.Amount} x {pe.Product.Name} à {pe.Product.Price} {currency}";
+                if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
+                {
+                    sumDiscount += de.Amount;
+                    yield return $"\tRabatt: -{de.Amount} {currency} ({de.Discount})";
+                    yield return $"\t{pe.Product.Price * pe.Amount - de.Amount} {currency}";
+                }
+                else
+                {
+                    yield return $"\t{pe.Product.Price * pe.Amount} {currency}";
+                }
                 yield return "";
             }
-            yield return $"Totalt: {cart.FinalPrice} kr";
+            var coupons = cart.AppliedCoupons;
+            foreach (var de in coupons)
+            {
+                sumDiscount += de.Amount;
+                yield return $"Rabattkod: \"{de.Discount.CouponCode}\" ({de.Discount})";
+                yield return $"\t-{de.Amount} {currency}";
+                yield return "";
+            }
+            if (sumDiscount != 0)
+                yield return $"Total rabatt: -{sumDiscount} {currency}";
+            decimal fp = cart.FinalPrice;
+            decimal fpRounded = Math.Round(fp);
+            if (fp != fpRounded)
+                yield return $"Öresavrundning: {(fpRounded - fp):+0.00;-0.00} {currency}";
+            yield return $"Att betala: {fpRounded:0.00} {currency}";
         }
 
         // Metoder som kan användas till att skapa ett kvitto och spara som en fil på datorn.
         public static void SaveReceipt(ShoppingCart cart)
             => File.WriteAllLines(PathToReceipt, CreateReceipt(cart));
 
-        //public static void CreateReceipt(ShoppingCart cart, string path) => throw new NotImplementedException();
-
         // Metoder som kan användas till att spara varukorgen som en fil på datorn.
         public static void SaveShoppingCart(ShoppingCart cart)
             => File.WriteAllLines(PathToCart, cart.Select(pe => $"{pe.Product.SerialNumber}#{pe.Amount}"));
 
-        //public static void SaveShoppingCart(ShoppingCart cart, string path) => throw new NotImplementedException();
-
         // Kan användas till att läsa in den sparade varukorgen när en ny instans av programmet skapas eller på användarens begäran.
-        public static ShoppingCart LoadShoppingCart()
+        public static bool TryLoadShoppingCart(out ShoppingCart cart, out int errorCount)
         {
-            ShoppingCart cart = new ShoppingCart();
-            foreach (ProductEntry productEntry in LoadCartContents())
-                try
-                {
-                    cart.Add(productEntry);
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine(e.Message);
-                }
-            return cart;
+            if (TryLoadCartContents(out IReadOnlyList<ProductEntry> contents, out errorCount))
+            {
+                cart = new ShoppingCart();
+                foreach (ProductEntry productEntry in contents)
+                    try
+                    {
+                        cart.Add(productEntry);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Error.WriteLine(e.Message);
+                        ++errorCount;
+                    }
+                if (errorCount == 0 || cart.UniqueProductCount != 0)
+                    return true;
+            }
+            cart = null;
+            return false;
         }
 
-        private static List<ProductEntry> LoadCartContents()
+        private static bool TryLoadCartContents(out IReadOnlyList<ProductEntry> productEntries, out int errorCount)
         {
             string[] lines;
             try
@@ -132,10 +167,13 @@ namespace WFShop
             }
             catch (FileNotFoundException)
             {
-                throw new FileNotFoundException($"Kunde inte hitta varukorgen: \"{PathToCart}\"");
+                productEntries = Array.Empty<ProductEntry>();
+                errorCount = 0; // File does not exist isn't an error.
+                return false;
             }
             var culture = CultureInfo.InvariantCulture;
-            List<ProductEntry> productEntries = new List<ProductEntry>();
+            var pe = new List<ProductEntry>(lines.Length);
+            errorCount = 0;
             foreach (string line in lines)
             {
                 string[] columns = line.Split('#');
@@ -144,25 +182,29 @@ namespace WFShop
                     int serialNumber = int.Parse(columns[0], culture);
                     int amount = int.Parse(columns[1], culture);
                     // GetProduct kan kasta KeyNotFoundException om serienummret inte matchar någon produkt.
-                    productEntries.Add(new ProductEntry(GetProduct(serialNumber), amount));
+                    pe.Add(new ProductEntry(GetProduct(serialNumber), amount));
                 }
                 catch (FormatException)
                 {
                     string errorMessage = $"Rad \"{line}\" lästes inte in korrekt. Var god kontrollera källan.";
                     Console.Error.WriteLine(errorMessage);
+                    ++errorCount;
                 }
                 catch (KeyNotFoundException)
                 {
                     string errorMessage = $"Serienummret '{columns[0]}' refererar inte till någon produkt.";
                     Console.Error.WriteLine(errorMessage);
+                    ++errorCount;
                 }
                 catch (Exception e)
                 {
                     string errorMessage = $"Oväntat fel på rad \"{line}\". Fördjupad felinformation:\n{e}";
                     Console.Error.WriteLine(errorMessage);
+                    ++errorCount;
                 }
             }
-            return productEntries;
+            productEntries = pe;
+            return errorCount == 0 || pe.Count != 0;
         }
 
         // Omvandlar int till Product.
@@ -199,6 +241,8 @@ namespace WFShop
                 }
                 else
                 {
+                    if (keyGroup == null)
+                        keyGroup = new Dictionary<string, string>();
                     int iSplit = line.IndexOf(SPLIT_CHAR);
                     if (iSplit < 0)
                         throw new FormatException($"Rad #{rowNum} är inte i key-value format.");
@@ -206,7 +250,7 @@ namespace WFShop
                     int iQuote = line.IndexOf(QUOTE_CHAR, iSplit + 1);
                     if (iQuote < 0 || !line.RangeIsWhiteSpace(iSplit, iQuote, Range.Option.Exclusive_Exclusive))
                     {
-                        keyGroup.Add(key, line.Substring(iSplit).Trim());
+                        keyGroup.Add(key, line.Substring(iSplit + 1).Trim());
                     }
                     else // - Row begins with a QUOTE: *possible* multi-row value.
                     {
@@ -236,10 +280,7 @@ namespace WFShop
             if (multiRowKey != null) // - File ended with "open" QUOTE value.
                 throw new FormatException("Unexpected end-of-file: Value closing quotes expected.");
             if (keyGroup != null) // - Previous row was not empty, yield data!
-            {
                 yield return keyGroup;
-                keyGroup = null;
-            }
         }
     }
 }

@@ -81,6 +81,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="discounts.kvg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="productSortiment.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
+using System.IO;
 
 namespace WFShop
 {
@@ -13,22 +14,55 @@ namespace WFShop
         [STAThread]
         static void Main()
         {
-            //Discount Test!
-            Discounts.BuyXPayForY.Parser.ParseOrNull(
-                new Dictionary<string, string>
-                {
-                    ["Type"] = "BXP4Y",
-                    ["Name"] = "3 för 2 Apelsiner!",
-                    ["Desc"] = "...",
-                    ["ProductSN"] = "273984130",
-                    ["BuyX"] = "3",
-                    ["PayY"] = "2",
-                }
-                );
+            InitializeFilePaths();
+            InitializeDiscountParsers();
+            LoadProductsAndDiscounts();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MyForm());
+        }
+
+        private static void InitializeDiscountParsers()
+        {
+            Discounts.BuyXPayForY.RegisterParser();
+            Discounts.TotalPercentageCoupon.RegisterParser();
+        }
+
+        private static void InitializeFilePaths()
+        {
+            var tempFolder = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.Machine);
+            var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            FileHandler.PathToProducts = "productSortiment.csv";
+            FileHandler.PathToDiscounts = "discounts.kvg";
+            FileHandler.PathToCart = Path.Combine(tempFolder, "cart.csv");
+            FileHandler.PathToReceipt = Path.Combine(desktopFolder, "receipt.txt");
+            ImageHandler.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
+        }
+
+        private static void LoadProductsAndDiscounts()
+        {
+            //if (!File.Exists(FileHandler.PathToCart))
+            //{
+            //    using (StreamWriter streamWriter = new StreamWriter(FileHandler.PathToCart))
+            //    {
+            //        streamWriter.Write(string.Empty);
+            //        streamWriter.Close(); // <- Lyckas inte stänga med File-klassen.
+            //    }
+            //    //MessageBox.Show($"Skapade filen {FileHandler.PathToCart}.");
+            //}
+            try
+            {
+                if (!FileHandler.HasProductsLoaded)
+                    FileHandler.LoadProducts();
+                if (!FileHandler.HasDiscountsLoaded)
+                    FileHandler.LoadDiscounts();
+            }
+            catch (FileNotFoundException e)
+            {
+                MessageBox.Show(e.Message);
+                Environment.Exit(0);
+            }
         }
     }
 }
