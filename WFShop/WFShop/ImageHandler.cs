@@ -37,7 +37,7 @@ namespace WFShop
         }
 
         private static Image p_default;
-        public static Image Default => p_default ?? (p_default = LoadImage("no-image"));
+        public static Image Default => p_default ?? (p_default = LoadImage("bild-saknas"));
         
         // LoadImages(): IEnumerable<Image> <==> LoadImages(): List<Image>
         

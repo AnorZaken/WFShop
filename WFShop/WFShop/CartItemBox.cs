@@ -13,6 +13,7 @@ namespace WFShop
         // Control fields
         private Label quantityLabel;
         private Label totalPriceLabel;
+        private Control discount = null;
 
         // Fields
         private Color accentColor;
@@ -57,7 +58,6 @@ namespace WFShop
         public bool HasDiscountInfo
             => table.RowCount == 2;
 
-        private Control discount = null;
 
         public CartItemBox(ProductEntry productEntry, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
         {
@@ -97,7 +97,7 @@ namespace WFShop
             Thumbnail = new PictureBox
             {
                 SizeMode = PictureBoxSizeMode.Zoom,
-                BackColor = SetAccentColor(),
+                BackColor = Color.White,
                 Margin = new Padding(0),
                 Dock = DockStyle.Fill,
                 Cursor = Cursors.Hand
@@ -107,7 +107,7 @@ namespace WFShop
             Label productNameLabel = new Label
             {
                 Text = ProductEntry.Product.Name,
-                Font = new Font(SetControlFont(), 8, FontStyle.Bold),
+                Font = new Font(GetControlFont(), 8, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Dock = DockStyle.Fill
             };
@@ -117,7 +117,7 @@ namespace WFShop
             table.Controls.Add(new Label
             {
                 Text = $"{ProductEntry.Product.Price} kr",
-                Font = new Font(SetControlFont(), 8),
+                Font = new Font(GetControlFont(), 8, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill
             }, 2, 0);
@@ -129,7 +129,7 @@ namespace WFShop
             {
                 Text = $"{GetTotalCost()} kr",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(SetControlFont(), 8),
+                Font = new Font(GetControlFont(), 8, FontStyle.Bold),
                 Dock = DockStyle.Fill
             };
             table.Controls.Add(totalPriceLabel, 4, 0);
@@ -137,9 +137,9 @@ namespace WFShop
             RemoveButton = new Button
             {
                 Text = "🗙",
-                Font = new Font(SetControlFont(), 12),
+                Font = new Font(GetControlFont(), 12),
                 TextAlign = ContentAlignment.MiddleCenter,
-                BackColor = Color.Red,
+                BackColor = GetAccentColor(),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Dock = DockStyle.Fill,
@@ -149,6 +149,8 @@ namespace WFShop
             };
             table.Controls.Add(RemoveButton, 5, 0);
             RemoveButton.Click += (s, e) => Parent.Controls.Remove(this);
+            RemoveButton.MouseEnter += (s, e) => RemoveButton.BackColor = Color.Red;
+            RemoveButton.MouseLeave += (s, e) => RemoveButton.BackColor = GetAccentColor();
         }
 
         public void RemoveDiscontInfo()
@@ -177,7 +179,7 @@ namespace WFShop
                 table.RowCount = 2;
                 //table.Height *= 2;
                 Height *= 2;
-                discount = new Label() { Text = discountEntry.ToString(), Font = new Font("Arial", 8), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleRight };
+                discount = new Label() { Text = discountEntry.ToString(), Font = new Font(GetControlFont(), 8), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleRight };
                 table.SetColumnSpan(discount, 6);
                 table.Controls.Add(discount, 0, 1);
             }
@@ -204,14 +206,13 @@ namespace WFShop
             // QuantityAddLabel
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
-
             QuantitySubtractButton = new Button
             {
                 Text = "-",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(SetControlFont(), 16, FontStyle.Bold),
+                Font = new Font(GetControlFont(), 16, FontStyle.Bold),
                 FlatStyle = FlatStyle.Flat,
-                BackColor = SetAccentColor(),
+                BackColor = GetAccentColor(),
                 ForeColor = Color.White,
                 Margin = new Padding(3, 3, 0, 3),
                 Dock = DockStyle.Fill,
@@ -235,7 +236,7 @@ namespace WFShop
             {
                 Text = Quantity.ToString(),
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(SetControlFont(), 12, FontStyle.Bold),
+                Font = new Font(GetControlFont(), 12, FontStyle.Bold),
                 BackColor = Color.White,
                 Margin = new Padding(0, 5, 0, 5),
                 Dock = DockStyle.Fill
@@ -246,9 +247,9 @@ namespace WFShop
             {
                 Text = "+",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(SetControlFont(), 16, FontStyle.Bold),
+                Font = new Font(GetControlFont(), 16, FontStyle.Bold),
                 FlatStyle = FlatStyle.Flat,
-                BackColor = SetAccentColor(),
+                BackColor = GetAccentColor(),
                 ForeColor = Color.White,
                 Margin = new Padding(0, 3, 3, 3),
                 Dock = DockStyle.Fill,
@@ -275,10 +276,10 @@ namespace WFShop
         }
 
         // Om accentColor är tomt sätt det till orange.
-        private Color SetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
+        private Color GetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
 
         // Om controlFont inte har ett värde, sätt den till Arial.
-        private string SetControlFont() => controlFont ?? "Arial";
+        private string GetControlFont() => controlFont ?? "Arial";
 
         public decimal GetTotalCost() => ProductEntry.Product.Price * Quantity;
 

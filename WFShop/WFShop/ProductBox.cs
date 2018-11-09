@@ -78,7 +78,7 @@ namespace WFShop
 
             Thumbnail = new PictureBox
             {
-                BackColor = SetAccentColor(),
+                BackColor = Color.White,
                 Dock = DockStyle.Fill,
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Margin = new Padding(0),
@@ -90,7 +90,7 @@ namespace WFShop
             Label productNameLabel = new Label
             {
                 Text = Product.Name,
-                Font = new Font(SetControlFont(), 8, FontStyle.Bold),
+                Font = new Font(GetControlFont(), 12, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Dock = DockStyle.Fill
             };
@@ -100,7 +100,7 @@ namespace WFShop
             RichTextBox productDescriptionTextBox = new RichTextBox
             {
                 Text = Product.Description,
-                Font = new Font(SetControlFont(), 8),
+                Font = new Font(GetControlFont(), 10),
                 BorderStyle = BorderStyle.None,
                 ScrollBars = RichTextBoxScrollBars.Vertical,
                 ReadOnly = true,
@@ -115,7 +115,7 @@ namespace WFShop
             table.Controls.Add(new Label
             {
                 Text = $"{Product.Price} kr",
-                Font = new Font(SetControlFont(), 8, FontStyle.Bold),
+                Font = new Font(GetControlFont(), 12, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill
             });
@@ -123,8 +123,8 @@ namespace WFShop
             AddToCartButton = new Button
             {
                 Text = "Lägg till",
-                Font = new Font(SetControlFont(), 8, FontStyle.Bold),
-                BackColor = SetAccentColor(),
+                Font = new Font(GetControlFont(), 12, FontStyle.Bold),
+                BackColor = GetAccentColor(),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Dock = DockStyle.Fill,
@@ -142,8 +142,8 @@ namespace WFShop
 
         public override string ToString() => $"ProductBox describing: {Product}";
 
-        private Color SetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
+        private Color GetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
 
-        private string SetControlFont() => controlFont ?? "Arial";
+        private string GetControlFont() => controlFont ?? "Arial";
     }
 }
