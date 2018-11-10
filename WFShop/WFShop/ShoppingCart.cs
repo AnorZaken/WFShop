@@ -13,7 +13,7 @@ namespace WFShop
      *     var amount = entry.Amount;
      * }
      */
-    class ShoppingCart : IEnumerable<ProductEntry>
+    class ShoppingCart : IEnumerable<ProductAmount>
     {
         private readonly Dictionary<Product, int> cart = new Dictionary<Product, int>();
         private readonly HashSet<Discount> appliedCoupons = new HashSet<Discount>();
@@ -26,7 +26,7 @@ namespace WFShop
         private bool isDirtyDiscounts = true; //TODO: dessa sätts aldrig false!
         private decimal p_articleValue, p_discountValue, p_rebateValue;
         private int p_articleCount;
-        private IReadOnlyCollection<DiscountEntry> p_appliedRebates = Array.Empty<DiscountEntry>();
+        private IReadOnlyCollection<DiscountAmount> p_appliedRebates = Array.Empty<DiscountAmount>();
 
         // Antalet varor, dvs har man 4st äpplen och 6st ägg så är antalet varor 10.
         public int ArticleCount
@@ -103,7 +103,7 @@ namespace WFShop
         public bool RemoveCoupon(string couponCode)
             => Discount.TryGetCoupon(couponCode, out Discount d) && RemoveCoupon(d);
 
-        public void Add(ProductEntry productEntry)
+        public void Add(ProductAmount productEntry)
             => Add(productEntry.Product, productEntry.Amount);
 
         public void Add(Product product, int amount = 1)
@@ -148,34 +148,34 @@ namespace WFShop
             return false;
         }
 
-        public IEnumerable<ProductEntry> Products
+        public IEnumerable<ProductAmount> Products
             => this;
 
         public IReadOnlyDictionary<Product, int> ProductsDict
             => cart; // <-- dålig kodstil. TODO!
 
-        public IReadOnlyCollection<DiscountEntry> AppliedCoupons
-            => appliedCoupons.Select(c => new DiscountEntry(c, c.Calculate(cart, RebateValue))).ToArray();
+        public IReadOnlyCollection<DiscountAmount> AppliedCoupons
+            => appliedCoupons.Select(c => new DiscountAmount(c, c.Calculate(cart, RebateValue))).ToArray();
 
-        public IReadOnlyCollection<DiscountEntry> AppliedRebates
+        public IReadOnlyCollection<DiscountAmount> AppliedRebates
             => isDirtyArticles
-            ? p_appliedRebates = FindApplicableRebates().Select(r => new DiscountEntry(r, r.Calculate(cart))).ToArray()
+            ? p_appliedRebates = FindApplicableRebates().Select(r => new DiscountAmount(r, r.Calculate(cart))).ToArray()
             : p_appliedRebates;
 
         public bool HasRebate(int productSerialNumber) // TODO - fixa bättre!
             => AppliedRebates.Any(d => d.Discount.ProductSerialNumber == productSerialNumber);
 
-        public bool TryGetRebate(int productSerialNumber, out DiscountEntry discountEntry)
+        public bool TryGetRebate(int productSerialNumber, out DiscountAmount discountEntry)
         {
             // TODO - fixa bättre!
             discountEntry = AppliedRebates.FirstOrDefault(d => d.Discount.ProductSerialNumber == productSerialNumber);
             return discountEntry.Discount != null;
         }
 
-        IEnumerator<ProductEntry> IEnumerable<ProductEntry>.GetEnumerator()
+        IEnumerator<ProductAmount> IEnumerable<ProductAmount>.GetEnumerator()
             => cart
             .OrderBy(kvp => kvp.Key.Name, StringComparer.CurrentCulture)
-            .Select(kvp => new ProductEntry(kvp.Key, kvp.Value))
+            .Select(kvp => new ProductAmount(kvp.Key, kvp.Value))
             .GetEnumerator();
 
         //public IEnumerator<Entry> GetEnumerator()
@@ -253,6 +253,6 @@ namespace WFShop
         //    }
         //}
 
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ProductEntry>)this).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ProductAmount>)this).GetEnumerator();
     }
 }

@@ -2,20 +2,20 @@
 
 namespace WFShop
 {
-    readonly struct ProductEntry : IEquatable<ProductEntry>
+    readonly struct ProductAmount : IEquatable<ProductAmount>
     {
         public readonly Product Product;
         public readonly int Amount;
 
         public int SerialNumber => Product?.SerialNumber ?? -1;
 
-        public ProductEntry(Product product, int amount)
+        public ProductAmount(Product product, int amount)
         {
             Product = product;
             Amount = amount;
         }
 
-        public bool Equals(ProductEntry other)
+        public bool Equals(ProductAmount other)
             => Product == other.Product & Amount == other.Amount;
 
         public override bool Equals(object obj)
@@ -27,16 +27,16 @@ namespace WFShop
         public override string ToString()
             => Product.ToString() + " x" + Amount;
 
-        public static bool operator ==(in ProductEntry a, in ProductEntry b)
+        public static bool operator ==(in ProductAmount a, in ProductAmount b)
             => a.Equals(b);
 
-        public static bool operator !=(in ProductEntry a, in ProductEntry b)
+        public static bool operator !=(in ProductAmount a, in ProductAmount b)
             => !a.Equals(b);
 
-        public static ProductEntry operator +(in ProductEntry pe, int amount)
-            => new ProductEntry(pe.Product, pe.Amount + amount);
+        public static ProductAmount operator +(in ProductAmount pe, int amount)
+            => new ProductAmount(pe.Product, pe.Amount + amount);
 
-        public static ProductEntry operator -(in ProductEntry pe, int amount)
-            => new ProductEntry(pe.Product, pe.Amount - amount);
+        public static ProductAmount operator -(in ProductAmount pe, int amount)
+            => new ProductAmount(pe.Product, pe.Amount - amount);
     }
 }

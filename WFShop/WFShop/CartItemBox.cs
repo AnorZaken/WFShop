@@ -27,7 +27,7 @@ namespace WFShop
         public PictureBox Thumbnail { get; set; }
 
         // Properties
-        public ProductEntry ProductEntry { get; set; }
+        public ProductAmount ProductEntry { get; set; }
 
         private int Quantity
         {
@@ -58,7 +58,7 @@ namespace WFShop
         public bool HasDiscountInfo
             => table.RowCount == 2;
 
-        public CartItemBox(ProductEntry productEntry, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
+        public CartItemBox(ProductAmount productEntry, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
         {
             ProductEntry = productEntry;
             quantity = ProductEntry.Amount;
@@ -159,7 +159,7 @@ namespace WFShop
             }
         }
 
-        public void SetDiscountInfo(DiscountEntry discountEntry) // TODO!
+        public void SetDiscountInfo(DiscountAmount discountEntry) // TODO!
         {
             if (discountEntry.Amount == 0)
             {
