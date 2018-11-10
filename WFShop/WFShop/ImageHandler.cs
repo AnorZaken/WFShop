@@ -10,6 +10,8 @@ namespace WFShop
 {
     abstract class ImageHandler
     {
+        private static Image p_default;
+        public static Image Default => p_default ?? (p_default = LoadImage("bild-saknas"));
         public static string PathToFolder { get; set; }
 
         //private static FileInfo[] LoadFiles(string fileExtension = DEFAULT_EXT) =>
@@ -35,9 +37,6 @@ namespace WFShop
                 return Image.FromFile(filePath);
             return null;
         }
-
-        private static Image p_default;
-        public static Image Default => p_default ?? (p_default = LoadImage("bild-saknas"));
         
         // LoadImages(): IEnumerable<Image> <==> LoadImages(): List<Image>
         

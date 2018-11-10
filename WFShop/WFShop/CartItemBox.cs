@@ -58,7 +58,6 @@ namespace WFShop
         public bool HasDiscountInfo
             => table.RowCount == 2;
 
-
         public CartItemBox(ProductEntry productEntry, int width = 450) : base(text: "", left: 0, top: 0, width, height: 50)
         {
             ProductEntry = productEntry;
@@ -70,14 +69,10 @@ namespace WFShop
 
         private void Initialize()
         {
-            Panel panel = new Panel { Dock = DockStyle.Fill };
+            var panel = new Panel { Dock = DockStyle.Fill };
             Controls.Add(panel);
 
-            table = new TableLayoutPanel
-            {
-                RowCount = 1,
-                Dock = DockStyle.Fill
-            };
+            table = new TableLayoutPanel { RowCount = 1, Dock = DockStyle.Fill };
             panel.Controls.Add(table);
 
             // Statisk storlek på thumbnail.
@@ -92,7 +87,6 @@ namespace WFShop
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
             // Ta bort-knapp.
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 50));
-            // Allt = 100%
 
             Thumbnail = new PictureBox
             {
@@ -104,7 +98,8 @@ namespace WFShop
             };
             table.Controls.Add(Thumbnail, 0, 0);
 
-            Label productNameLabel = new Label
+            // Produktnamnet
+            var productNameLabel = new Label
             {
                 Text = ProductEntry.Product.Name,
                 Font = new Font(GetControlFont(), 8, FontStyle.Bold),
@@ -188,16 +183,12 @@ namespace WFShop
         private Control CreateQuantityPanel()
         {
             // Mini-kontroll.
-            Control quantityPanel = new Control("", 0, 0, 150, Height - 2) { Margin = new Padding(0) };
+            var quantityPanel = new Control("", 0, 0, 150, Height - 2) { Margin = new Padding(0) };
 
-            Panel panel = new Panel { Dock = DockStyle.Fill };
+            var panel = new Panel { Dock = DockStyle.Fill };
             quantityPanel.Controls.Add(panel);
 
-            TableLayoutPanel table = new TableLayoutPanel
-            {
-                ColumnCount = 3,
-                Dock = DockStyle.Fill
-            };
+            var table = new TableLayoutPanel { ColumnCount = 3, Dock = DockStyle.Fill };
             panel.Controls.Add(table);
             // QuantitySubtractButton
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));

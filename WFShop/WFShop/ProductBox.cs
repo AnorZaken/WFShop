@@ -10,15 +10,13 @@ namespace WFShop
 {
     class ProductBox : Control
     {
-        // Control fields
-        public Button AddToCartButton { get; set; }
-        public PictureBox Thumbnail { get; set; }
-
         // Fields
         private Color accentColor;
         private string controlFont;
 
         // Control properties.
+        public Button AddToCartButton { get; set; }
+        public PictureBox Thumbnail { get; set; }
 
         // Properties
         public Product Product { get; }
@@ -32,6 +30,7 @@ namespace WFShop
                 ReInitialise();
             }
         }
+
         public string ControlFont
         {
             private get => controlFont;
@@ -52,14 +51,10 @@ namespace WFShop
         // Rita upp ProductBox-instansen.
         private void Initialize()
         {
-            Panel panel = new Panel { Dock = DockStyle.Fill, BorderStyle = BorderStyle.FixedSingle };
+            var panel = new Panel { Dock = DockStyle.Fill, BorderStyle = BorderStyle.FixedSingle };
             Controls.Add(panel);
 
-            TableLayoutPanel table = new TableLayoutPanel
-            {
-                ColumnCount = 2,
-                Dock = DockStyle.Fill,
-            };
+            var table = new TableLayoutPanel { ColumnCount = 2, Dock = DockStyle.Fill };
             panel.Controls.Add(table);
             // Hälften av kontrollen höjd tas upp av produktbilden.
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, Height / 2));
@@ -68,7 +63,7 @@ namespace WFShop
             // Beskrivning.
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-            // Statisk höjd på priset och knappens cell.
+            // "Statisk" höjd på priset och knappens cell.
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
 
             // Priset.
@@ -87,7 +82,7 @@ namespace WFShop
             table.Controls.Add(Thumbnail);
             table.SetColumnSpan(Thumbnail, 2);
 
-            Label productNameLabel = new Label
+            var productNameLabel = new Label
             {
                 Text = Product.Name,
                 Font = new Font(GetControlFont(), 12, FontStyle.Bold),
@@ -97,7 +92,7 @@ namespace WFShop
             table.Controls.Add(productNameLabel);
             table.SetColumnSpan(productNameLabel, 2);
 
-            RichTextBox productDescriptionTextBox = new RichTextBox
+            var productDescriptionTextBox = new RichTextBox
             {
                 Text = Product.Description,
                 Font = new Font(GetControlFont(), 10),
@@ -140,10 +135,10 @@ namespace WFShop
             Initialize();
         }
 
-        public override string ToString() => $"ProductBox describing: {Product}";
-
         private Color GetAccentColor() => accentColor.IsEmpty ? Color.Orange : accentColor;
 
         private string GetControlFont() => controlFont ?? "Arial";
+
+        public override string ToString() => $"ProductBox describing: {Product}";
     }
 }

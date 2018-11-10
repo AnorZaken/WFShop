@@ -31,8 +31,8 @@ namespace WFShop
         public MyForm()
         {
             Text = "<App Name>"; // TODO: läs från config
-            Size = new Size(1570, 890);
-            MinimumSize = new Size(1570, 890);
+            Size = new Size(1600, 890);
+            MinimumSize = new Size(1600, 890);
             products = Product.AllProducts;
             cart = LoadOrCreateCart();
 
@@ -56,15 +56,12 @@ namespace WFShop
             SizeChanged += (s, e) =>
             {
                 foreach (var cib in cartItemBoxView.Controls)
-                    (cib as CartItemBox).Width = (cib as CartItemBox).Parent.Width;
+                    (cib as CartItemBox).Width = (cib as CartItemBox).Parent.Width - 25;
             };
 
-            splitContainer = new SplitContainer
-            {
-                //BorderStyle = BorderStyle.FixedSingle,
-                Dock = DockStyle.Fill
-            };
+            splitContainer = new SplitContainer { Dock = DockStyle.Fill };
             Controls.Add(splitContainer);
+
             // En tredjedel av fönstret.
             splitContainer.SplitterDistance = (int)(Width / 1.5);
             splitContainer.SplitterMoved += (s, e) =>
@@ -95,22 +92,14 @@ namespace WFShop
 
         private void PopulatePanelLeftSide()
         {
-            TableLayoutPanel mainTable = new TableLayoutPanel
-            {
-                RowCount = 2,
-                Dock = DockStyle.Fill
-            };
+            var mainTable = new TableLayoutPanel { RowCount = 2, Dock = DockStyle.Fill };
             splitContainer.Panel1.Controls.Add(mainTable);
             mainTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
-            Panel topBarPanel = new Panel
-            {
-                Margin = new Padding(0),
-                Dock = DockStyle.Fill
-            };
+            var topBarPanel = new Panel { Margin = new Padding(0), Dock = DockStyle.Fill };
             mainTable.Controls.Add(topBarPanel);
 
-            TableLayoutPanel topBarTable = new TableLayoutPanel { ColumnCount = 4, Dock = DockStyle.Fill };
+            var topBarTable = new TableLayoutPanel { ColumnCount = 4, Dock = DockStyle.Fill };
             topBarTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
             topBarTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
             topBarTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
@@ -156,18 +145,24 @@ namespace WFShop
         
         private void PopulatePanelRightSide()
         {
-            TableLayoutPanel mainTable = new TableLayoutPanel { RowCount = 2, Dock = DockStyle.Fill };
+            var mainTable = new TableLayoutPanel { RowCount = 2, Dock = DockStyle.Fill };
             splitContainer.Panel2.Controls.Add(mainTable);
             mainTable.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             mainTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
-            TableLayoutPanel cartViewTable = new TableLayoutPanel { ColumnCount = 2, RowCount = 3, Dock = DockStyle.Fill };
+            var cartViewTable = new TableLayoutPanel { ColumnCount = 2, RowCount = 3, Dock = DockStyle.Fill };
             mainTable.Controls.Add(cartViewTable);
             cartViewTable.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             cartViewTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
             cartViewTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
 
-            cartItemBoxView = new FlowLayoutPanel { AutoScroll = true, Dock = DockStyle.Fill };
+            cartItemBoxView = new FlowLayoutPanel
+            {
+                AutoScroll = true,
+                WrapContents = false,
+                FlowDirection = FlowDirection.TopDown,
+                Dock = DockStyle.Fill
+            };
             cartViewTable.Controls.Add(cartItemBoxView);
             cartViewTable.SetColumnSpan(cartItemBoxView, 2);
 
@@ -200,12 +195,12 @@ namespace WFShop
             };
             cartViewTable.Controls.Add(totalCostLabel);
 
-            TableLayoutPanel buttonTable = new TableLayoutPanel { ColumnCount = 2, Dock = DockStyle.Fill };
+            var buttonTable = new TableLayoutPanel { ColumnCount = 2, Dock = DockStyle.Fill };
             mainTable.Controls.Add(buttonTable);
             buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
             buttonTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
 
-            Button saveCartButton = new Button
+            var saveCartButton = new Button
             {
                 Text = "Spara",
                 Font = new Font("Arial", 12, FontStyle.Bold),
@@ -222,7 +217,7 @@ namespace WFShop
                 MessageBox.Show("Din varukorg sparades.");
             };
 
-            Button checkoutButton = new Button
+            var checkoutButton = new Button
             {
                 Text = "Slutför beställning",
                 Font = new Font("Arial", 12, FontStyle.Bold),
@@ -257,15 +252,14 @@ namespace WFShop
             couponCodeTextBox.Clear();
         }
 
-        private void CreateProductBoxes(IReadOnlyCollection<Product> products, string filter = "Alla", string sortBy = null)
+        // Rensa productBoxView och skapa ProductBox för varje produkt som finns i textfilen.
+        private void CreateProductBoxes(IReadOnlyCollection<Product> products, string filter = null, string sortBy = null)
         {
             productBoxView.Controls.Clear();
 
-            //Skapa ProductBox för varje produkt som finns i textfilen.
-
             // IEnumerable som innehåller filtrerad version av product-listan.
             IEnumerable<Product> filteredProducts = 
-                filter == "Alla" || filter is null ?
+                filter is "Alla" || filter is null ?
                 products.Select(p => p) :
                 products.Where(p => p.Category.Name == filter);
 
@@ -277,7 +271,7 @@ namespace WFShop
 
             foreach (Product product in sortedProducts)
             {
-                ProductBox p = new ProductBox(product) { AccentColor = Color.DarkOrange };
+                var p = new ProductBox(product) { AccentColor = Color.DarkOrange };
                 productBoxView.Controls.Add(p);
                 p.Thumbnail.Image = ImageHandler.LoadImage(product.SerialNumber) ?? ImageHandler.Default;
                 p.AddToCartButton.Click += OnAnyButtonClick_ProductBox;
@@ -290,7 +284,7 @@ namespace WFShop
             cartItemBoxView.Controls.Clear();
             foreach (ProductEntry pe in cart)
             {
-                CartItemBox c = new CartItemBox(pe, cartItemBoxView.Width - 6) { AccentColor = Color.DarkOrange };
+                var c = new CartItemBox(pe, cartItemBoxView.Width - 25) { AccentColor = Color.DarkOrange };
                 cartItemBoxView.Controls.Add(c);
                 c.Thumbnail.Image = ImageHandler.LoadImage(pe.SerialNumber) ?? ImageHandler.Default;
                 c.QuantityAddButton.Click += OnAnyButtonClick_CartItemBox;
@@ -301,7 +295,7 @@ namespace WFShop
                 if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
                     c.SetDiscountInfo(de);
 
-                splitContainer.SplitterMoved += (s, e) => c.Width = cartItemBoxView.Width - 6;
+                splitContainer.SplitterMoved += (s, e) => c.Width = cartItemBoxView.Width - 25;
             }
         }
 
@@ -382,11 +376,12 @@ namespace WFShop
         // ProductBox och CartItemBox
         private void OnThumbnailClick(object sender, EventArgs e)
         {
-            Form enlargePhoto = new Form() { Size = new Size(750, 750) };
+            var enlargePhoto = new Form() { Size = new Size(750, 750) };
             enlargePhoto.Controls.Add(new PictureBox
             {
                 Image = (sender as PictureBox).Image,
                 SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.White,
                 Dock = DockStyle.Fill
             });
             enlargePhoto.Show();
