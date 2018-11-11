@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Drawing;
 using System.IO;
 
 namespace WFShop
@@ -24,7 +19,7 @@ namespace WFShop
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MyForm(shop));
+            Application.Run(new ShopForm(shop));
         }
 
         private static void InitializeDiscountParsers()
@@ -62,11 +57,10 @@ namespace WFShop
 
         private static void LoadDiscounts()
         {
-            DiscountLoader.PathToDiscounts = "discounts.kvg";
             try
             {
                 if (!DiscountLoader.HasDiscountsLoaded)
-                    DiscountLoader.LoadDiscounts();
+                    DiscountLoader.Load("discounts.kvg");
             }
             catch (FileNotFoundException e)
             {

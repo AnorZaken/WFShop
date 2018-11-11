@@ -10,7 +10,7 @@ using System.IO;
 
 namespace WFShop
 {
-    class MyForm : Form
+    class ShopForm : Form
     {
         // Control fields
         private SplitContainer splitContainer;
@@ -28,7 +28,7 @@ namespace WFShop
         // Properties
         private ShoppingCart cart;
 
-        public MyForm(Shop shop)
+        public ShopForm(Shop shop)
         {
             Text = shop.Name;
             Size = new Size(1600, 890);

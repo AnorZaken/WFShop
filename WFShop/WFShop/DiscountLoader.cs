@@ -6,15 +6,14 @@ namespace WFShop
 {
     static class DiscountLoader
     {
-        public static string PathToDiscounts { get; set; }
         public static bool HasDiscountsLoaded { get; private set; }
 
-        public static void LoadDiscounts()
+        public static void Load(string path)
         {
             if (HasDiscountsLoaded) // TODO: implementera ReloadDiscounts?
                 throw new InvalidOperationException("Discounts have already been loaded.");
 
-            foreach(var dict in ParseKeyGroups(PathToDiscounts))
+            foreach(var dict in ParseKeyGroups(path))
             {
                 if (!Discount.TryParse(dict, out _))
                 {
@@ -29,7 +28,7 @@ namespace WFShop
             HasDiscountsLoaded = true;
         }
 
-        public static IEnumerable<Dictionary<string, string>> ParseKeyGroups(string filePath)
+        private static IEnumerable<Dictionary<string, string>> ParseKeyGroups(string filePath)
         {
             const char SPLIT_CHAR = ':';
             const char QUOTE_CHAR = '"';
