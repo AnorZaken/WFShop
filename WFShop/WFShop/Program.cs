@@ -14,11 +14,10 @@ namespace WFShop
         [STAThread]
         static void Main()
         {
-            InitializeFilePaths();
+            ImageHandler.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
+
             InitializeDiscountParsers();
             LoadDiscounts();
-
-            ImageHandler.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
 
             var shop = CreateShop();
             shop.Products.Load();
@@ -61,17 +60,13 @@ namespace WFShop
             }
         }
 
-        private static void InitializeFilePaths()
-        {
-            FileHandler.PathToDiscounts = "discounts.kvg";
-        }
-
         private static void LoadDiscounts()
         {
+            DiscountLoader.PathToDiscounts = "discounts.kvg";
             try
             {
-                if (!FileHandler.HasDiscountsLoaded)
-                    FileHandler.LoadDiscounts();
+                if (!DiscountLoader.HasDiscountsLoaded)
+                    DiscountLoader.LoadDiscounts();
             }
             catch (FileNotFoundException e)
             {

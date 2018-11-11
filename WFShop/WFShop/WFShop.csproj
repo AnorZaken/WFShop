@@ -61,7 +61,7 @@
     <Compile Include="Discounts\BuyXPayForY.cs" />
     <Compile Include="Discounts\TotalPercentageCoupon.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FileHandler.cs" />
+    <Compile Include="DiscountLoader.cs" />
     <Compile Include="GUI.cs" />
     <Compile Include="ICurrencyFormatter.cs" />
     <Compile Include="IDiscount.cs" />

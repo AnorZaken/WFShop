@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Drawing;
-using System.Globalization;
 
 namespace WFShop
 {
-    abstract class FileHandler // TODO: denna klassen har för mycket coupling...
+    static class DiscountLoader
     {
         public static string PathToDiscounts { get; set; }
         public static bool HasDiscountsLoaded { get; private set; }
