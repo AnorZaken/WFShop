@@ -277,7 +277,7 @@ namespace WFShop
             {
                 var p = new ProductBox(product) { AccentColor = Color.DarkOrange };
                 productBoxView.Controls.Add(p);
-                p.Thumbnail.Image = ImageHandler.LoadImage(product.SerialNumber) ?? ImageHandler.Default;
+                p.Thumbnail.Image = ImageLoader.LoadImage(product.SerialNumber) ?? ImageLoader.Default;
                 p.AddToCartButton.Click += OnAnyButtonClick_ProductBox;
                 p.Thumbnail.Click += OnThumbnailClick;
             }
@@ -290,7 +290,7 @@ namespace WFShop
             {
                 var c = new CartItemBox(pe, cartItemBoxView.Width - 25) { AccentColor = Color.DarkOrange };
                 cartItemBoxView.Controls.Add(c);
-                c.Thumbnail.Image = ImageHandler.LoadImage(pe.SerialNumber) ?? ImageHandler.Default;
+                c.Thumbnail.Image = ImageLoader.LoadImage(pe.SerialNumber) ?? ImageLoader.Default;
                 c.QuantityAddButton.Click += OnAnyButtonClick_CartItemBox;
                 c.QuantitySubtractButton.Click += OnAnyButtonClick_CartItemBox;
                 c.RemoveButton.Click += OnAnyButtonClick_CartItemBox;

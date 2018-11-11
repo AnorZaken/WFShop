@@ -68,7 +68,7 @@
     <Compile Include="IDiscountApplicableCartInfo.cs" />
     <Compile Include="IDiscountCalculationCartInfo.cs" />
     <Compile Include="IDiscountParser.cs" />
-    <Compile Include="ImageHandler.cs" />
+    <Compile Include="ImageLoader.cs" />
     <Compile Include="IProductLoader.cs" />
     <Compile Include="IProductProvider.cs" />
     <Compile Include="IReceiptFormatter.cs" />

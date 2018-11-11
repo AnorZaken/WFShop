@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
+﻿using System.IO;
 using System.Drawing;
 
 namespace WFShop
 {
-    abstract class ImageHandler
+    static class ImageLoader
     {
         private static Image p_default;
         public static Image Default => p_default ?? (p_default = LoadImage("bild-saknas"));

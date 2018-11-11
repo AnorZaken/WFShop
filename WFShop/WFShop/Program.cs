@@ -14,7 +14,7 @@ namespace WFShop
         [STAThread]
         static void Main()
         {
-            ImageHandler.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
+            ImageLoader.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
 
             InitializeDiscountParsers();
             LoadDiscounts();
