@@ -13,7 +13,6 @@ namespace WFShop
     {
         public static string PathToProducts { get; set; }
         public static string PathToCart { get; set; }
-        public static string PathToReceipt { get; set; }
         public static string PathToDiscounts { get; set; }
         public static bool HasProductsLoaded { get; private set; }
         public static bool HasDiscountsLoaded { get; private set; }
@@ -88,48 +87,6 @@ namespace WFShop
             }
             HasDiscountsLoaded = true;
         }
-        
-        private static IEnumerable<string> CreateReceipt(ShoppingCart cart, string currency = "kr")
-        {
-            yield return "Kvitto";
-            yield return "";
-            decimal sumDiscount = 0;
-            foreach (ProductEntry pe in cart)
-            {
-                yield return $"({pe.SerialNumber})";
-                yield return $"{pe.Amount} x {pe.Product.Name} à {pe.Product.Price} {currency}";
-                if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
-                {
-                    sumDiscount += de.Amount;
-                    yield return $"\tRabatt: -{de.Amount} {currency} ({de.Discount})";
-                    yield return $"\t{pe.Product.Price * pe.Amount - de.Amount} {currency}";
-                }
-                else
-                {
-                    yield return $"\t{pe.Product.Price * pe.Amount} {currency}";
-                }
-                yield return "";
-            }
-            var coupons = cart.AppliedCoupons;
-            foreach (var de in coupons)
-            {
-                sumDiscount += de.Amount;
-                yield return $"Rabattkod: \"{de.Discount.CouponCode}\" ({de.Discount})";
-                yield return $"\t-{de.Amount} {currency}";
-                yield return "";
-            }
-            if (sumDiscount != 0)
-                yield return $"Total rabatt: -{sumDiscount} {currency}";
-            decimal fp = cart.FinalPrice;
-            decimal fpRounded = Math.Round(fp);
-            if (fp != fpRounded)
-                yield return $"Öresavrundning: {(fpRounded - fp):+0.00;-0.00} {currency}";
-            yield return $"Att betala: {fpRounded:0.00} {currency}";
-        }
-
-        // Metoder som kan användas till att skapa ett kvitto och spara som en fil på datorn.
-        public static void SaveReceipt(ShoppingCart cart)
-            => File.WriteAllLines(PathToReceipt, CreateReceipt(cart));
 
         // Metoder som kan användas till att spara varukorgen som en fil på datorn.
         public static void SaveShoppingCart(ShoppingCart cart)

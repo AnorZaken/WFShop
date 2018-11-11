@@ -18,9 +18,10 @@ namespace WFShop
             InitializeDiscountParsers();
             LoadProductsAndDiscounts();
 
+            var shop = CreateShop();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MyForm());
+            Application.Run(new MyForm(shop));
         }
 
         private static void InitializeDiscountParsers()
@@ -29,14 +30,21 @@ namespace WFShop
             Discounts.TotalPercentageCoupon.RegisterParser();
         }
 
+        private static Shop CreateShop()
+        {
+            var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var pathToReciept = Path.Combine(desktopFolder, "receipt.txt");
+            var shop = new Shop(); // TODO: give name argument?
+            shop.InitializeRecieptSaver(pathToReciept, new RecieptFormatter(CurrencySEK.Instance));
+            return shop;
+        }
+
         private static void InitializeFilePaths()
         {
             var tempFolder = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.Machine);
-            var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             FileHandler.PathToProducts = "productSortiment.csv";
             FileHandler.PathToDiscounts = "discounts.kvg";
             FileHandler.PathToCart = Path.Combine(tempFolder, "cart.csv");
-            FileHandler.PathToReceipt = Path.Combine(desktopFolder, "receipt.txt");
             ImageHandler.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
         }
 

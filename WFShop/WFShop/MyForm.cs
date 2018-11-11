@@ -24,15 +24,18 @@ namespace WFShop
 
         // Fields
         private IReadOnlyCollection<Product> products;
+        private Shop shop;
 
         // Properties
         private ShoppingCart cart;
 
-        public MyForm()
+        public MyForm(Shop shop)
         {
-            Text = "<App Name>"; // TODO: läs från config
+            Text = shop.Name;
             Size = new Size(1600, 890);
             MinimumSize = new Size(1600, 890);
+
+            this.shop = shop;
             products = Product.AllProducts;
             cart = LoadOrCreateCart();
 
@@ -232,8 +235,13 @@ namespace WFShop
             {
                 if (cart.ArticleCount > 0)
                 {
-                    FileHandler.SaveReceipt(cart);
-                    MessageBox.Show("Kvittot har sparats till:\n" + $"\"{FileHandler.PathToReceipt}\"");
+                    var reciept = shop.RecieptSaver.Save(cart);
+
+                    // Om du bara vill ha kvittot först, och spara senare:
+                    //var reciept = shop.RecieptFormatter.Format(cart);
+                    //shop.RecieptSaver.Save(reciept);
+
+                    MessageBox.Show("Kvittot har sparats till:\n" + $"\"{shop.RecieptSaver.Path}\"");
                     ClearCart();
                 }
                 else
