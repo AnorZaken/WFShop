@@ -95,10 +95,10 @@ namespace WFShop
         // Kan användas till att läsa in den sparade varukorgen när en ny instans av programmet skapas eller på användarens begäran.
         public static bool TryLoadShoppingCart(out ShoppingCart cart, out int errorCount)
         {
-            if (TryLoadCartContents(out IReadOnlyList<ProductEntry> contents, out errorCount))
+            if (TryLoadCartContents(out IReadOnlyList<ProductAmount> contents, out errorCount))
             {
                 cart = new ShoppingCart();
-                foreach (ProductEntry productEntry in contents)
+                foreach (ProductAmount productEntry in contents)
                     try
                     {
                         cart.Add(productEntry);
@@ -115,7 +115,7 @@ namespace WFShop
             return false;
         }
 
-        private static bool TryLoadCartContents(out IReadOnlyList<ProductEntry> productEntries, out int errorCount)
+        private static bool TryLoadCartContents(out IReadOnlyList<ProductAmount> productEntries, out int errorCount)
         {
             string[] lines;
             try
@@ -124,12 +124,12 @@ namespace WFShop
             }
             catch (FileNotFoundException)
             {
-                productEntries = Array.Empty<ProductEntry>();
+                productEntries = Array.Empty<ProductAmount>();
                 errorCount = 0; // File does not exist isn't an error.
                 return false;
             }
             var culture = CultureInfo.InvariantCulture;
-            var pe = new List<ProductEntry>(lines.Length);
+            var pe = new List<ProductAmount>(lines.Length);
             errorCount = 0;
             foreach (string line in lines)
             {
@@ -139,7 +139,7 @@ namespace WFShop
                     int serialNumber = int.Parse(columns[0], culture);
                     int amount = int.Parse(columns[1], culture);
                     // GetProduct kan kasta KeyNotFoundException om serienummret inte matchar någon produkt.
-                    pe.Add(new ProductEntry(GetProduct(serialNumber), amount));
+                    pe.Add(new ProductAmount(GetProduct(serialNumber), amount));
                 }
                 catch (FormatException)
                 {

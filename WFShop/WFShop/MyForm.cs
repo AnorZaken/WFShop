@@ -290,7 +290,7 @@ namespace WFShop
         private void RefreshCartItemBoxView()
         {
             cartItemBoxView.Controls.Clear();
-            foreach (ProductEntry pe in cart)
+            foreach (ProductAmount pe in cart)
             {
                 var c = new CartItemBox(pe, cartItemBoxView.Width - 25) { AccentColor = Color.DarkOrange };
                 cartItemBoxView.Controls.Add(c);
@@ -300,7 +300,7 @@ namespace WFShop
                 c.RemoveButton.Click += OnAnyButtonClick_CartItemBox;
                 c.Thumbnail.Click += OnThumbnailClick;
 
-                if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
+                if (cart.TryGetRebate(pe.SerialNumber, out DiscountAmount de))
                     c.SetDiscountInfo(de);
 
                 splitContainer.SplitterMoved += (s, e) => c.Width = cartItemBoxView.Width - 25;
@@ -349,14 +349,14 @@ namespace WFShop
         private void OnAnyButtonClick_CartItemBox(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            ProductEntry pe = (ProductEntry)button.Tag;
+            ProductAmount pe = (ProductAmount)button.Tag;
 
             if (button.Name == "QuantityAddButton")
             {
                 cart.Add(pe.Product);
                 RefreshTotalCost();
                 var c = GetCartItemBox();
-                if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
+                if (cart.TryGetRebate(pe.SerialNumber, out DiscountAmount de))
                     c.SetDiscountInfo(de);
             }
             else if (button.Name == "QuantitySubtractButton")
@@ -366,7 +366,7 @@ namespace WFShop
                 var c = GetCartItemBox();
                 if (c.HasDiscountInfo)
                 {
-                    cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de);
+                    cart.TryGetRebate(pe.SerialNumber, out DiscountAmount de);
                     c.SetDiscountInfo(de);
                 }
             }

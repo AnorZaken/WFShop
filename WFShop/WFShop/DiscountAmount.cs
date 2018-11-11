@@ -2,22 +2,22 @@
 
 namespace WFShop
 {
-    readonly struct DiscountEntry : IEquatable<DiscountEntry>
+    readonly struct DiscountAmount : IEquatable<DiscountAmount>
     {
         public readonly IDiscount Discount;
         public readonly decimal Amount;
 
-        public DiscountEntry(IDiscount discount, decimal amount)
+        public DiscountAmount(IDiscount discount, decimal amount)
         {
             Discount = discount;
             Amount = amount;
         }
 
-        public bool Equals(DiscountEntry other)
+        public bool Equals(DiscountAmount other)
             => Discount == other.Discount & Amount == other.Amount;
 
         public override bool Equals(object obj)
-            => obj is DiscountEntry other && this.Equals(other);
+            => obj is DiscountAmount other && this.Equals(other);
 
         public override int GetHashCode()
             => base.GetHashCode();
@@ -25,10 +25,10 @@ namespace WFShop
         public override string ToString()
             => Discount.Name + " (-" + Amount + ")";
 
-        public static bool operator ==(in DiscountEntry a, in DiscountEntry b)
+        public static bool operator ==(in DiscountAmount a, in DiscountAmount b)
             => a.Equals(b);
 
-        public static bool operator !=(in DiscountEntry a, in DiscountEntry b)
+        public static bool operator !=(in DiscountAmount a, in DiscountAmount b)
             => !a.Equals(b);
     }
 }

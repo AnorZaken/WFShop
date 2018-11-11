@@ -19,11 +19,11 @@ namespace WFShop
             yield return "Kvitto";
             yield return "";
             decimal sumDiscount = 0;
-            foreach (ProductEntry pe in cart)
+            foreach (ProductAmount pe in cart)
             {
                 yield return $"({pe.SerialNumber})";
                 yield return $"{pe.Amount} x {pe.Product.Name} à {Currency.Format(pe.Product.Price)}";
-                if (cart.TryGetRebate(pe.SerialNumber, out DiscountEntry de))
+                if (cart.TryGetRebate(pe.SerialNumber, out DiscountAmount de))
                 {
                     sumDiscount += de.Amount;
                     yield return $"\tRabatt: {Currency.Format(-de.Amount)} ({de.Discount})";
