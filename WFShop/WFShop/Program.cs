@@ -38,16 +38,16 @@ namespace WFShop
         {
             // Order is important!
             var shop = new Shop(out Shop.ISetter setter); // TODO: give name argument?
-            setter.Set(RecieptSaver());
+            setter.Set(ReceiptSaver());
             setter.Set(ProductProvider());
             setter.Set(CartStorage());
             return shop;
 
-            RecieptSaver RecieptSaver()
+            ReceiptSaver ReceiptSaver()
             {
                 var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 var path = Path.Combine(desktopFolder, "receipt.txt");
-                return new RecieptSaver(path, new RecieptFormatter(CurrencySEK.Instance));
+                return new ReceiptSaver(path, new ReceiptFormatter(CurrencySEK.Instance));
             }
 
             IProductProvider ProductProvider()

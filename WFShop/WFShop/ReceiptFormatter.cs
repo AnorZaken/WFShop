@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace WFShop
 {
-    class RecieptFormatter : IRecieptFormatter
+    class ReceiptFormatter : IReceiptFormatter
     {
-        public static RecieptFormatter Default { get; } = new RecieptFormatter();
+        public static ReceiptFormatter Default { get; } = new ReceiptFormatter();
 
-        public RecieptFormatter(ICurrencyFormatter currencyFormatter = null)
+        public ReceiptFormatter(ICurrencyFormatter currencyFormatter = null)
         {
             Currency = currencyFormatter ?? CurrencyFormatter.Default;
         }

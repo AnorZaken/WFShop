@@ -2,7 +2,7 @@
 
 namespace WFShop
 {
-    interface IRecieptFormatter
+    interface IReceiptFormatter
     {
         IEnumerable<string> Format(ShoppingCart cart);
     }
