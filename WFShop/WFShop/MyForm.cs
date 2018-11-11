@@ -235,13 +235,16 @@ namespace WFShop
             {
                 if (cart.ArticleCount > 0)
                 {
-                    var reciept = shop.RecieptSaver.Save(cart);
+                    IEnumerable<string> formattedReceipt = shop.RecieptFormatter.Format(cart);
+                    //var reciept = shop.RecieptSaver.Save(cart);
 
                     // Om du bara vill ha kvittot först, och spara senare:
                     //var reciept = shop.RecieptFormatter.Format(cart);
                     //shop.RecieptSaver.Save(reciept);
 
+                    shop.RecieptSaver.Save(formattedReceipt);
                     MessageBox.Show("Kvittot har sparats till:\n" + $"\"{shop.RecieptSaver.Path}\"");
+                    new Receipt(formattedReceipt).Show();
                     ClearCart();
                 }
                 else

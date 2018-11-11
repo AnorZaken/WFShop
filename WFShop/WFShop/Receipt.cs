@@ -10,52 +10,36 @@ namespace WFShop
 {
     class Receipt : Form
     {
-        private DataGridView gridView;
-        private readonly ShoppingCart cart;
+        private RichTextBox textBox;
+        private readonly IEnumerable<string> formattedReceipt;
 
-        public Receipt(ShoppingCart cart)
+        public Receipt(IEnumerable<string> formattedReceipt)
         {
-            this.cart = cart;
+            this.formattedReceipt = formattedReceipt;
+            Text = "Kvitto";
+            Size = new Size(500, 890);
             Initialize();
         }
 
         private void Initialize()
         {
-            gridView = new DataGridView
+            textBox = new RichTextBox
             {
-                Font = new Font("Arial", 12),
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                Text = "",
                 ReadOnly = true,
-                RowHeadersVisible = false,
-                ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None,
-                CellBorderStyle = DataGridViewCellBorderStyle.None,
+                BorderStyle = BorderStyle.None,
+                BackColor = Color.White,
+                Font = new Font("Arial", 12),
                 Dock = DockStyle.Fill
             };
-            Controls.Add(gridView);
-
-            string[] headers =
-            {
-                "Produktnummer", "Antal", "Produkt", "Pris", "Rabatt", "Totalt"
-            };
-            gridView.Columns.Add("serialNumber", "Produknummer");
-            gridView.Columns.Add("amount", "Antal");
-            gridView.Columns.Add("product", "Produkt");
-            gridView.Columns.Add("price", "Pris");
-            gridView.Columns.Add("discount", "Rabatt");
-            gridView.Columns.Add("totalPrice", "Totalt");
-            FillGridView();
+            Controls.Add(textBox);
+            PrintReceipt();
         }
 
-        private void FillGridView()
+        private void PrintReceipt()
         {
-            foreach (ProductAmount productEntry in cart)
-                gridView.Rows.Add(
-                    productEntry.SerialNumber,
-                    productEntry.Amount,
-                    productEntry.Product.Name,
-                    productEntry.Product.Price,
-                    cart.TryGetRebate(productEntry.SerialNumber, out DiscountAmount de) ? $"-{de.Amount}" : "",
-                    productEntry.Amount * productEntry.Product.Price);
+            foreach (string line in formattedReceipt)
+                textBox.Text += $"{line}\n";
         }
     }
 }
