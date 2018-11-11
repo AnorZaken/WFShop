@@ -23,8 +23,7 @@ namespace WFShop
         private RadioButton sortByPriceRadioButton;
 
         // Fields
-        private IReadOnlyCollection<Product> products;
-        private Shop shop;
+        private readonly Shop shop;
 
         // Properties
         private ShoppingCart cart;
@@ -36,15 +35,14 @@ namespace WFShop
             MinimumSize = new Size(1600, 890);
 
             this.shop = shop;
-            products = Product.AllProducts;
             cart = LoadOrCreateCart();
 
             Initialize();
         }
 
-        private static ShoppingCart LoadOrCreateCart()
+        private ShoppingCart LoadOrCreateCart()
         {
-            if (!FileHandler.TryLoadShoppingCart(out ShoppingCart cart, out int errorCount))
+            if (!shop.CartStorage.TryLoad(out ShoppingCart cart, out int errorCount))
                 return new ShoppingCart();
             else if (errorCount != 0)
                 MessageBox.Show("Fel uppstod då den sparade varukorgen laddades."
@@ -83,7 +81,7 @@ namespace WFShop
             // Höger
             PopulatePanelRightSide();
 
-            CreateProductBoxes(products);
+            CreateProductBoxes(shop.Products.All);
         }
 
         // Förstör och återskapa inre kontroller.
@@ -138,7 +136,7 @@ namespace WFShop
             mainTable.Controls.Add(productBoxView);
             
             // Returnera en IEnumerable med unika kategorier.
-            IEnumerable<string> categories = products.Select(p => p.Category.Name).Distinct();
+            IEnumerable<string> categories = shop.Products.All.Select(p => p.Category.Name).Distinct();
             filterComboBox.Items.Add("Alla");
             filterComboBox.Items.AddRange(categories.ToArray());
             filterComboBox.SelectedIndexChanged += (s, e) => RefreshProductBoxView();
@@ -216,7 +214,7 @@ namespace WFShop
             buttonTable.Controls.Add(saveCartButton);
             saveCartButton.Click += (s, e) =>
             {
-                FileHandler.SaveShoppingCart(cart);
+                shop.CartStorage.Save(cart);
                 MessageBox.Show("Din varukorg sparades.");
             };
 
@@ -235,13 +233,13 @@ namespace WFShop
             {
                 if (cart.ArticleCount > 0)
                 {
-                    var reciept = shop.RecieptSaver.Save(cart);
+                    var reciept = shop.Reciept.Save(cart);
 
                     // Om du bara vill ha kvittot först, och spara senare:
                     //var reciept = shop.RecieptFormatter.Format(cart);
                     //shop.RecieptSaver.Save(reciept);
 
-                    MessageBox.Show("Kvittot har sparats till:\n" + $"\"{shop.RecieptSaver.Path}\"");
+                    MessageBox.Show("Kvittot har sparats till:\n" + $"\"{shop.Reciept.Path}\"");
                     ClearCart();
                 }
                 else
@@ -308,7 +306,7 @@ namespace WFShop
         }
 
         private void RefreshProductBoxView() =>
-            CreateProductBoxes(products, filterComboBox.SelectedItem as string, sortByNameRadioButton.Checked ? "Name" : sortByPriceRadioButton.Checked ? "Price" : "");
+            CreateProductBoxes(shop.Products.All, filterComboBox.SelectedItem as string, sortByNameRadioButton.Checked ? "Name" : sortByPriceRadioButton.Checked ? "Price" : "");
 
         // this
         private void OnCouponCodeTextBoxChanged(object sender, EventArgs e)

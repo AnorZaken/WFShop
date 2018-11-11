@@ -6,6 +6,7 @@ namespace WFShop
     {
         public readonly Product Product;
         public readonly int Amount;
+        public decimal Cost => Product.Price * Amount;
 
         public int SerialNumber => Product?.SerialNumber ?? -1;
 

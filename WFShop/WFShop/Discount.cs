@@ -27,19 +27,15 @@ namespace WFShop
         public string Type { get; }
         public bool IsSingleProduct => ProductSerialNumber != -1;
         public int ProductSerialNumber { get; }
+        //public bool IsLateCalculated { get; }
         protected bool IsRegistered { get; }
 
-        public abstract bool IsApplicable(IReadOnlyDictionary<Product, int> cart);
+        public abstract bool IsApplicable(IDiscountApplicableCartInfo cartInfo);
 
-        public decimal Calculate(IReadOnlyDictionary<Product, int> cart)
-            => Math.Round(CalculateImpl(cart), 2, MidpointRounding.AwayFromZero);
+        public decimal Calculate(IDiscountCalculationCartInfo cartInfo)
+            => Math.Round(CalculateImpl(cartInfo), 2, MidpointRounding.AwayFromZero);
 
-        public decimal Calculate(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate)
-            => Math.Round(CalculateImpl(cart, totalAppliedRebate), 2, MidpointRounding.AwayFromZero);
-
-        protected abstract decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart);
-        protected virtual decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate)
-            => CalculateImpl(cart);
+        protected abstract decimal CalculateImpl(IDiscountCalculationCartInfo cartInfo);
 
         public override string ToString() => Name;
 

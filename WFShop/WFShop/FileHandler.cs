@@ -11,62 +11,8 @@ namespace WFShop
 {
     abstract class FileHandler // TODO: denna klassen har för mycket coupling...
     {
-        public static string PathToProducts { get; set; }
-        public static string PathToCart { get; set; }
         public static string PathToDiscounts { get; set; }
-        public static bool HasProductsLoaded { get; private set; }
         public static bool HasDiscountsLoaded { get; private set; }
-
-        public static void LoadProducts()
-        {
-            if (HasProductsLoaded) // TODO: implementera ReloadProducts?
-                throw new InvalidOperationException("Products have already been loaded.");
-
-            string[] lines;
-            try
-            {
-                lines = File.ReadAllLines(PathToProducts);
-            }
-            catch (FileNotFoundException)
-            {
-                throw new FileNotFoundException($"Kunde inte hitta produktfilen: \"{PathToProducts}\"");
-            }
-            var culture = CultureInfo.InvariantCulture;
-            for (int iRow = 0; iRow < lines.Length; ++iRow)
-            {
-                string[] columns = lines[iRow].Split('#');
-                try
-                {
-                    // Kasta undantag vid eventuell formateringsfel.
-                    int serialNumber = int.Parse(columns[0], culture);
-                    string name = columns[1];
-                    decimal price = decimal.Parse(columns[2], culture);
-                    string category = columns[3];
-                    string description = columns[4];
-                    // Ingen ny produkt läggs till om ett undantag kastas ovan.
-                    Product.RegisterNew(serialNumber, name, price, category, description);
-                }
-                catch (FormatException)
-                {
-                    // Meddelande: "Textrad lästes inte in korrekt."
-                    string errorMessage = $"Rad #{iRow + 1} kunde inte tolkas. Var god kontrollera formatteringen.";
-                    Console.Error.WriteLine(errorMessage);
-                }
-                catch (Product.DuplicateException e)
-                {
-                    string errorMessage = $"Produkten på rad #{iRow + 1} kunde inte registreras i systemet:\n{e}";
-                    Console.Error.WriteLine(errorMessage);
-                }
-                catch (Exception e)
-                {
-                    // Om undantag kastas av oförväntad anledning.
-                    // Meddelande: "Kunde inte läsa in textrad."
-                    string errorMessage = $"Oväntat fel på rad #{iRow + 1}. Fördjupad felinformation:\n{e}";
-                    Console.Error.WriteLine(errorMessage);
-                }
-            }
-            HasProductsLoaded = true;
-        }
 
         public static void LoadDiscounts()
         {
@@ -86,91 +32,6 @@ namespace WFShop
                 }
             }
             HasDiscountsLoaded = true;
-        }
-
-        // Metoder som kan användas till att spara varukorgen som en fil på datorn.
-        public static void SaveShoppingCart(ShoppingCart cart)
-            => File.WriteAllLines(PathToCart, cart.Select(pe => $"{pe.Product.SerialNumber}#{pe.Amount}"));
-
-        // Kan användas till att läsa in den sparade varukorgen när en ny instans av programmet skapas eller på användarens begäran.
-        public static bool TryLoadShoppingCart(out ShoppingCart cart, out int errorCount)
-        {
-            if (TryLoadCartContents(out IReadOnlyList<ProductAmount> contents, out errorCount))
-            {
-                cart = new ShoppingCart();
-                foreach (ProductAmount productEntry in contents)
-                    try
-                    {
-                        cart.Add(productEntry);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.Error.WriteLine(e.Message);
-                        ++errorCount;
-                    }
-                if (errorCount == 0 || cart.UniqueProductCount != 0)
-                    return true;
-            }
-            cart = null;
-            return false;
-        }
-
-        private static bool TryLoadCartContents(out IReadOnlyList<ProductAmount> productEntries, out int errorCount)
-        {
-            string[] lines;
-            try
-            {
-                lines = File.ReadAllLines(PathToCart);
-            }
-            catch (FileNotFoundException)
-            {
-                productEntries = Array.Empty<ProductAmount>();
-                errorCount = 0; // File does not exist isn't an error.
-                return false;
-            }
-            var culture = CultureInfo.InvariantCulture;
-            var pe = new List<ProductAmount>(lines.Length);
-            errorCount = 0;
-            foreach (string line in lines)
-            {
-                string[] columns = line.Split('#');
-                try
-                {
-                    int serialNumber = int.Parse(columns[0], culture);
-                    int amount = int.Parse(columns[1], culture);
-                    // GetProduct kan kasta KeyNotFoundException om serienummret inte matchar någon produkt.
-                    pe.Add(new ProductAmount(GetProduct(serialNumber), amount));
-                }
-                catch (FormatException)
-                {
-                    string errorMessage = $"Rad \"{line}\" lästes inte in korrekt. Var god kontrollera källan.";
-                    Console.Error.WriteLine(errorMessage);
-                    ++errorCount;
-                }
-                catch (KeyNotFoundException)
-                {
-                    string errorMessage = $"Serienummret '{columns[0]}' refererar inte till någon produkt.";
-                    Console.Error.WriteLine(errorMessage);
-                    ++errorCount;
-                }
-                catch (Exception e)
-                {
-                    string errorMessage = $"Oväntat fel på rad \"{line}\". Fördjupad felinformation:\n{e}";
-                    Console.Error.WriteLine(errorMessage);
-                    ++errorCount;
-                }
-            }
-            productEntries = pe;
-            return errorCount == 0 || pe.Count != 0;
-        }
-
-        // Omvandlar int till Product.
-        private static Product GetProduct(int serialNumber)
-        {
-            if (!HasProductsLoaded)
-                LoadProducts();
-            return Product.TryGet(serialNumber, out Product p) ? p
-                : throw new KeyNotFoundException($"No such product (SN:{serialNumber})");
         }
 
         public static IEnumerable<Dictionary<string, string>> ParseKeyGroups(string filePath)

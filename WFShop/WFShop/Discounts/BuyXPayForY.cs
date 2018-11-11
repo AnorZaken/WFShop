@@ -18,22 +18,19 @@ namespace WFShop.Discounts
         public readonly int BuyX;
         public readonly int PayY;
 
-        protected sealed override decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart)
+        protected sealed override decimal CalculateImpl(IDiscountCalculationCartInfo cartInfo)
         {
-            if (Product.TryGet(ProductSerialNumber, out Product p) &&
-                cart.TryGetValue(p, out int cartAmount))
+            if (cartInfo.TryGet(ProductSerialNumber, out ProductAmount pa))
             {
-                // Här borde vi assert cartAmount >= 0 egentligen!
-                int rebateCount = Math.Max(0, cartAmount) / BuyX;
-                return rebateCount * (BuyX - PayY) * p.Price;
+                // Här borde vi assert amount >= 0 egentligen!
+                int rebateCount = Math.Max(0, pa.Amount) / BuyX;
+                return rebateCount * (BuyX - PayY) * pa.Product.Price;
             }
             return 0;
         }
 
-        public sealed override bool IsApplicable(IReadOnlyDictionary<Product, int> cart)
-            => Product.TryGet(ProductSerialNumber, out Product p)
-            && cart.TryGetValue(p, out int amount)
-            && amount >= BuyX;
+        public sealed override bool IsApplicable(IDiscountApplicableCartInfo cartInfo)
+            => cartInfo.GetAmount(ProductSerialNumber) >= BuyX;
 
         #region --- Parsing (static) ---
         /* Some third party must call the RegisterParser() function to make this

@@ -1,24 +1,36 @@
-﻿using System;
-
-namespace WFShop
+﻿namespace WFShop
 {
     class Shop
     {
-        public Shop(string name = "Shop")
+        public Shop(out ISetter setter, string name = "Shop")
         {
             Name = name;
+            setter = new Setter(this);
         }
 
         readonly public string Name;
+        
+        public RecieptSaver Reciept { get; private set; }
+        public IProductProvider Products { get; private set; }
+        public IShoppingCartStorage CartStorage { get; private set; }
 
-        public RecieptSaver RecieptSaver { get; private set; }
-        public IRecieptFormatter RecieptFormatter => RecieptSaver.Formatter;
-
-        public void InitializeRecieptSaver(string path, IRecieptFormatter formatter)
+        // Gör så att bara den kod som skapar en Shop instansen får access till setters!
+        public interface ISetter
         {
-            if (RecieptSaver != null)
-                throw new InvalidOperationException("Already Initialized!");
-            RecieptSaver = new RecieptSaver(path, formatter);
+            void Set(RecieptSaver recieptSaver);
+            void Set(IProductProvider productProvider);
+            void Set(IShoppingCartStorage cartLoader);
+        }
+        protected class Setter : ISetter
+        {
+            internal Setter(Shop shop)
+                => this.shop = shop;
+
+            readonly Shop shop;
+
+            public void Set(RecieptSaver rs) => shop.Reciept = rs;
+            public void Set(IProductProvider pp) => shop.Products = pp;
+            public void Set(IShoppingCartStorage ss) => shop.CartStorage = ss;
         }
     }
 }

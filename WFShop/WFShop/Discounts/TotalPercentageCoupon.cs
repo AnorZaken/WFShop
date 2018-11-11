@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Globalization;
 
 namespace WFShop.Discounts
@@ -24,23 +21,17 @@ namespace WFShop.Discounts
         // Minimum required cart value for coupon to be applicable.
         public readonly decimal MinCartValue;
 
-        private decimal Sum(IReadOnlyDictionary<Product, int> cart)
-            => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
+        //private decimal Sum(IReadOnlyDictionary<Product, int> cart)
+        //    => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
 
-        protected sealed override decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart)
+        protected sealed override decimal CalculateImpl(IDiscountCalculationCartInfo cartInfo)
         {
-            var sum = Sum(cart);
+            var sum = cartInfo.ArticleValue - cartInfo.AccumulatedDiscount();
             return sum >= MinCartValue ? sum * Percentage : 0;
         }
 
-        protected sealed override decimal CalculateImpl(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate)
-        {
-            var sum = Sum(cart) - totalAppliedRebate;
-            return sum >= MinCartValue ? sum * Percentage : 0;
-        }
-
-        public sealed override bool IsApplicable(IReadOnlyDictionary<Product, int> cart)
-            => Sum(cart) >= MinCartValue;
+        public sealed override bool IsApplicable(IDiscountApplicableCartInfo cartInfo)
+            => cartInfo.ArticleValue >= MinCartValue;
 
         #region --- Parsing (static) ---
         /* Some third party must call the RegisterParser() function to make this

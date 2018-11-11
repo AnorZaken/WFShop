@@ -19,6 +19,7 @@ namespace WFShop
             yield return "Kvitto";
             yield return "";
             decimal sumDiscount = 0;
+            // (ProductAmounts are returned by ShoppingCart in alphabetic order.)
             foreach (ProductAmount pe in cart)
             {
                 yield return $"({pe.SerialNumber})";

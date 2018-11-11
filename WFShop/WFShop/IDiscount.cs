@@ -24,13 +24,14 @@ namespace WFShop
         // Note: returns -1 if not product specific.
         int ProductSerialNumber { get; }
 
+        // Means Discount must be applied "late" (after non-late discounts).
+        // Is relative to the specific product this discount applies to; otherwise total cost.
+        //bool IsLateCalculated { get; } // TODO
+
         // Is this discount applicable to a cart containing the specified products (and amounts)?
-        bool IsApplicable(IReadOnlyDictionary<Product, int> cart);
+        bool IsApplicable(IDiscountApplicableCartInfo cartInfo);
 
         // Calculate how large of a discount this applies to a cart with the specified products (and amounts).
-        decimal Calculate(IReadOnlyDictionary<Product, int> cart);
-
-        // (Used by couponCodes.)
-        decimal Calculate(IReadOnlyDictionary<Product, int> cart, decimal totalAppliedRebate);
+        decimal Calculate(IDiscountCalculationCartInfo cartInfo);
     }
 }

@@ -16,9 +16,13 @@ namespace WFShop
         {
             InitializeFilePaths();
             InitializeDiscountParsers();
-            LoadProductsAndDiscounts();
+            LoadDiscounts();
+
+            ImageHandler.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
 
             var shop = CreateShop();
+            shop.Products.Load();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MyForm(shop));
@@ -32,37 +36,40 @@ namespace WFShop
 
         private static Shop CreateShop()
         {
-            var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var pathToReciept = Path.Combine(desktopFolder, "receipt.txt");
-            var shop = new Shop(); // TODO: give name argument?
-            shop.InitializeRecieptSaver(pathToReciept, new RecieptFormatter(CurrencySEK.Instance));
+            // Order is important!
+            var shop = new Shop(out Shop.ISetter setter); // TODO: give name argument?
+            setter.Set(RecieptSaver());
+            setter.Set(ProductProvider());
+            setter.Set(CartStorage());
             return shop;
+
+            RecieptSaver RecieptSaver()
+            {
+                var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var path = Path.Combine(desktopFolder, "receipt.txt");
+                return new RecieptSaver(path, new RecieptFormatter(CurrencySEK.Instance));
+            }
+
+            IProductProvider ProductProvider()
+                => new ProductProvider(new ProductLoader("productSortiment.csv"));
+
+            IShoppingCartStorage CartStorage()
+            {
+                var tempFolder = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.Machine);
+                var path = Path.Combine(tempFolder, "cart.csv");
+                return new ShoppingCartFileStorage(path, shop.Products);
+            }
         }
 
         private static void InitializeFilePaths()
         {
-            var tempFolder = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.Machine);
-            FileHandler.PathToProducts = "productSortiment.csv";
             FileHandler.PathToDiscounts = "discounts.kvg";
-            FileHandler.PathToCart = Path.Combine(tempFolder, "cart.csv");
-            ImageHandler.PathToFolder = Path.Combine(Environment.CurrentDirectory, "Images");
         }
 
-        private static void LoadProductsAndDiscounts()
+        private static void LoadDiscounts()
         {
-            //if (!File.Exists(FileHandler.PathToCart))
-            //{
-            //    using (StreamWriter streamWriter = new StreamWriter(FileHandler.PathToCart))
-            //    {
-            //        streamWriter.Write(string.Empty);
-            //        streamWriter.Close(); // <- Lyckas inte stänga med File-klassen.
-            //    }
-            //    //MessageBox.Show($"Skapade filen {FileHandler.PathToCart}.");
-            //}
             try
             {
-                if (!FileHandler.HasProductsLoaded)
-                    FileHandler.LoadProducts();
                 if (!FileHandler.HasDiscountsLoaded)
                     FileHandler.LoadDiscounts();
             }

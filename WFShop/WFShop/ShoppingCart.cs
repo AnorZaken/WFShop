@@ -7,16 +7,20 @@ using System.Text;
 namespace WFShop
 {
     /* För att läsa ut varorna:
-     * foreach (var entry in shoppingCart.Products)
+     * foreach (var entry in shoppingCart)
      * {
      *     var product = entry.Product;
      *     var amount = entry.Amount;
      * }
      */
-    class ShoppingCart : IEnumerable<ProductAmount>
+    partial class ShoppingCart
     {
-        private readonly Dictionary<Product, int> cart = new Dictionary<Product, int>();
+        private readonly Dictionary<int, ProductAmount> cart = new Dictionary<int, ProductAmount>();
         private readonly HashSet<Discount> appliedCoupons = new HashSet<Discount>();
+        private readonly DisCalcInfo disCalcInfo;
+
+        public ShoppingCart()
+            => disCalcInfo = new DisCalcInfo(this);
 
         // Antalet unika produkter, dvs har man 4st äpplen och 6st ägg så är antalet unika produkter 2.
         public int UniqueProductCount => cart.Count;
@@ -31,7 +35,7 @@ namespace WFShop
         // Antalet varor, dvs har man 4st äpplen och 6st ägg så är antalet varor 10.
         public int ArticleCount
             => isDirtyArticles
-            ? p_articleCount = cart.Values.Sum()
+            ? p_articleCount = cart.Values.Sum(pe => pe.Amount)
             : p_articleCount;
 
         // Totala värdet av varorna i kundvagnen, exklusive rabatter.
@@ -56,16 +60,16 @@ namespace WFShop
             => Math.Round(ArticleValue - DiscountValue, 2, MidpointRounding.AwayFromZero);
 
         protected decimal CalculateArticleValue()
-            => cart.Sum(kvp => kvp.Key.Price * kvp.Value);
+            => cart.Sum(kvp => kvp.Value.Cost);
 
         protected IEnumerable<Discount> FindApplicableRebates()
-            => Discount.AllRebates.Where(d => d.IsApplicable(cart));
+            => Discount.AllRebates.Where(d => d.IsApplicable(disCalcInfo));
 
         protected decimal CalculateRebatesValue()
             => AppliedRebates.Sum(de => de.Amount);
 
         protected decimal CalculateDiscountValue()
-            => RebateValue + appliedCoupons.Sum(d => d.Calculate(cart, RebateValue));
+            => RebateValue + appliedCoupons.Sum(d => d.Calculate(disCalcInfo));
 
         public bool AddCoupon(Discount coupon)
         {
@@ -111,15 +115,16 @@ namespace WFShop
             if (amount < 1)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Cannot add less than one product.");
 
-            if (cart.TryGetValue(product, out int existingAmount))
-                amount += existingAmount;
-            cart[product] = amount;
+            if (cart.TryGetValue(product.SerialNumber, out ProductAmount existing))
+                cart[product.SerialNumber] = existing + amount;
+            else
+                cart[product.SerialNumber] = new ProductAmount(product, amount);
             isDirtyArticles = true;
         }
 
         public bool RemoveAll(Product product)
         {
-            bool b = cart.Remove(product);
+            bool b = cart.Remove(product.SerialNumber);
             isDirtyArticles |= b;
             return b;
         }
@@ -135,13 +140,13 @@ namespace WFShop
             if (amount < 1)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Cannot remove less than one product.");
 
-            if (cart.TryGetValue(product, out int existingAmount))
+            if (cart.TryGetValue(product.SerialNumber, out ProductAmount existing))
             {
-                existingAmount -= amount;
-                if (existingAmount > 0)
-                    cart[product] = existingAmount;
+                existing -= amount;
+                if (existing.Amount > 0)
+                    cart[product.SerialNumber] = existing;
                 else
-                    cart.Remove(product);
+                    cart.Remove(product.SerialNumber);
                 isDirtyArticles = true;
                 return true;
             }
@@ -149,17 +154,14 @@ namespace WFShop
         }
 
         public IEnumerable<ProductAmount> Products
-            => this;
-
-        public IReadOnlyDictionary<Product, int> ProductsDict
-            => cart; // <-- dålig kodstil. TODO!
+            => cart.Values;
 
         public IReadOnlyCollection<DiscountAmount> AppliedCoupons
-            => appliedCoupons.Select(c => new DiscountAmount(c, c.Calculate(cart, RebateValue))).ToArray();
+            => appliedCoupons.Select(c => new DiscountAmount(c, c.Calculate(disCalcInfo))).ToArray();
 
         public IReadOnlyCollection<DiscountAmount> AppliedRebates
             => isDirtyArticles
-            ? p_appliedRebates = FindApplicableRebates().Select(r => new DiscountAmount(r, r.Calculate(cart))).ToArray()
+            ? p_appliedRebates = FindApplicableRebates().Select(r => new DiscountAmount(r, r.Calculate(disCalcInfo))).ToArray()
             : p_appliedRebates;
 
         public bool HasRebate(int productSerialNumber) // TODO - fixa bättre!
@@ -172,87 +174,9 @@ namespace WFShop
             return discountEntry.Discount != null;
         }
 
-        IEnumerator<ProductAmount> IEnumerable<ProductAmount>.GetEnumerator()
-            => cart
-            .OrderBy(kvp => kvp.Key.Name, StringComparer.CurrentCulture)
-            .Select(kvp => new ProductAmount(kvp.Key, kvp.Value))
+        public IEnumerator<ProductAmount> GetEnumerator()
+            => Products
+            .OrderBy(pe => pe.Product.Name, StringComparer.CurrentCulture)
             .GetEnumerator();
-
-        //public IEnumerator<Entry> GetEnumerator()
-        //{
-        //    var sortedCart = cart.OrderBy(kvp => kvp.Key.Name, StringComparer.CurrentCulture);
-        //    foreach (var kvp in sortedCart)
-        //    {
-        //        yield return new Entry(kvp.Key, kvp.Value);
-        //    }
-        //}
-
-        //void Exempel()
-        //{
-        //    var shoppingCart = this;
-        //    foreach(var entry in shoppingCart)
-        //    {
-        //        Console.WriteLine(entry.Product.Name + " x" + entry.Amount);
-        //    }
-        //}
-
-        //void Exempél()
-        //{
-        //    var shoppingCart = this;
-        //    using (IEnumerator<Entry> enumerator = shoppingCart.GetEnumerator())
-        //    {
-        //        while (enumerator.MoveNext())
-        //        {
-        //            var entry = enumerator.Current;
-        //            Console.WriteLine(entry.Product.Name + " x" + entry.Amount);
-        //        }
-        //    }
-        //}
-
-        //public IEnumerator<Entry> GetEnumerator()
-        //{
-        //    var sortedEntryList = cart.OrderBy(kvp => kvp.Key.Name, StringComparer.CurrentCulture)
-        //            .Select(kvp => new Entry(kvp.Key, kvp.Value)).ToList();
-        //    return new MyEnumerator(sortedEntryList);
-        //}
-
-        //private class MyEnumerator : IEnumerator<Entry>
-        //{
-        //    public MyEnumerator(List<Entry> list)
-        //    {
-        //        entries = list;
-        //    }
-
-        //    List<Entry> entries;
-        //    int index = 0;
-
-        //    public Entry Current { get; private set; }
-
-        //    object IEnumerator.Current { get { return Current; } }
-
-        //    public void Dispose()
-        //    { }
-
-        //    public bool MoveNext()
-        //    {
-        //        if (index >= entries.Count)
-        //        {
-        //            Current = default;
-        //            return false;
-        //        }
-        //        else
-        //        {
-        //            Current = entries[index];
-        //            return true;
-        //        }
-        //    }
-
-        //    public void Reset()
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
-
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ProductAmount>)this).GetEnumerator();
     }
 }

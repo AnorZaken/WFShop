@@ -21,20 +21,10 @@ namespace WFShop
             Description = desc;
         }
 
-        // Create and register a new product.
-        // (So it becomes accessible from the AllProducts property and the TryGet method.)
-        public static Product RegisterNew(int serialNumber, string name, decimal price, string category, string desc)
+        // Public Create method instead of public ctor (remnant of old design).
+        public static Product Create(int serialNumber, string name, decimal price, string category, string desc)
         {
             var pNew = new Product(serialNumber, name, price, category, desc);
-            try
-            {
-                products.Add(serialNumber, pNew);
-            }
-            catch (ArgumentException)
-            {
-                var pOld = products[serialNumber];
-                throw new DuplicateException(pOld, pNew);
-            }
             return pNew;
         }
 
@@ -59,16 +49,5 @@ namespace WFShop
 
         public override string ToString()
             => $"{Name ?? "<Unknown Product>"} ({SerialNumber})";
-
-        #region --- All Products (static) ---
-        /* Alla produkter ligger efter konstruktion statiskt tillgängliga i Product klassen. */
-        private static readonly Dictionary<int /*SerialNumber*/, Product> products = new Dictionary<int, Product>();
-
-        public static IReadOnlyCollection<Product> AllProducts => products.Values;
-
-        // Try get a Product from a serial number.
-        public static bool TryGet(int serialNumber, out Product product)
-            => products.TryGetValue(serialNumber, out product);
-        #endregion
     }
 }
